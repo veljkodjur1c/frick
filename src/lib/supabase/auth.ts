@@ -1,0 +1,20 @@
+import "server-only";
+import { cache } from "react";
+import type { User } from "@supabase/supabase-js";
+import { createClient } from "./server";
+
+/**
+ * The logged-in user, or null. Server code only.
+ * Verifies the session with Supabase Auth (not just the cookie), and runs once per request.
+ *
+ * Reads cookies, so with Cache Components the calling component must sit inside a <Suspense> boundary.
+ * Server Actions and Route Handlers must call this themselves; never trust a user id from the client.
+ */
+export const getCurrentUser = cache(async (): Promise<User | null> => {
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.getUser();
+  if (error) {
+    return null;
+  }
+  return data.user;
+});
