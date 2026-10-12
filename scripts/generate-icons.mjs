@@ -5,7 +5,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
 
-const BACKGROUND = "#0a0a0f";
+const BACKGROUND = "#010a13";
 const FOREGROUND = "#c8aa6e";
 
 const outDir = path.join(
