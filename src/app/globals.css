@@ -1,20 +1,136 @@
 @import "tailwindcss";
 
-/* Dark-only theme; keep --background in sync with theme/background color in manifest.ts and layout.tsx. */
-:root {
-  --background: #0a0a0f;
-  --foreground: #ededed;
+/*
+  Nexus design tokens (dark only). Rules live in CLAUDE.md -> "Design system".
+
+  - Features style things ONLY with these tokens, through Tailwind classes:
+    bg-surface, text-fg-muted, border-line, text-gold-300, rounded-lg, shadow-card ...
+  - The default Tailwind palette, radii and shadows are switched off (`initial` below),
+    so classes like text-zinc-400 or rounded-2xl silently do nothing. That is on purpose.
+  - Need a new token? Add it here, show it on /design, and mention it in the PR.
+  - Keep --color-abyss in sync with themeColor in layout.tsx and the colors in manifest.ts.
+*/
+
+@theme static {
+  --color-*: initial;
+  --color-white: #ffffff;
+  --color-black: #000000;
+
+  /* Backgrounds, darkest to lightest */
+  --color-abyss: #010a13; /* app background */
+  --color-deep: #0a1428; /* nav bar, sheets, inset areas */
+  --color-surface: #111c2b; /* cards */
+  --color-raised: #1a2838; /* inputs, hover, items inside cards */
+  --color-line: #233447; /* neutral borders and dividers */
+
+  /* Text */
+  --color-fg: #f0e6d2; /* main text */
+  --color-fg-muted: #a09b8c; /* secondary text, meta */
+  --color-fg-faint: #6f6d66; /* placeholders, disabled only (too weak for real text) */
+
+  /* Gold: frames, titles, rank, rewards */
+  --color-gold-100: #f0e6d2;
+  --color-gold-200: #e2cf9f;
+  --color-gold-300: #c8aa6e;
+  --color-gold-400: #c89b3c;
+  --color-gold-500: #785a28;
+  --color-gold-700: #463714;
+
+  /* Hextech: primary actions, links, focus */
+  --color-hextech-100: #cdfafa;
+  --color-hextech-300: #0ac8b9;
+  --color-hextech-500: #0397ab;
+  --color-hextech-700: #005a82;
+  --color-hextech-900: #0a323c;
+
+  /* Status */
+  --color-success: #3fb57a; /* Legit, task done */
+  --color-danger: #e5484d; /* Cap, errors, destructive */
+  --color-pending: #c89b3c; /* waiting for votes */
+  --color-boss: #c8323c; /* boss HP */
+  --color-boss-dark: #7a141c; /* bottom of the boss HP gradient */
+  --color-boss-trail: #f2c46d; /* damage just dealt, drains after a hit */
+
+  /* Rank tiers (emblem colors, not for body text) */
+  --color-rank-iron: #6e6662;
+  --color-rank-bronze: #a5704f;
+  --color-rank-silver: #a9b6be;
+  --color-rank-gold: #d8b04a;
+  --color-rank-platinum: #4fb7b0;
+  --color-rank-emerald: #2dbe7e;
+  --color-rank-diamond: #7b93ff;
+  --color-rank-master: #b366e3;
+  --color-rank-grandmaster: #e0464e;
+  --color-rank-challenger: #f4d06f;
+
+  /* Corner radius: small things are tighter, containers are softer */
+  --radius-*: initial;
+  --radius-sm: 4px; /* badges, checkboxes */
+  --radius-md: 8px; /* buttons, inputs, segmented control */
+  --radius-lg: 12px; /* cards, sheets, images in feed */
+
+  /* Shadows */
+  --shadow-*: initial;
+  --shadow-card: inset 0 1px 0 rgb(240 230 210 / 0.04), 0 10px 24px -14px rgb(0 0 0 / 0.9);
+  --shadow-sheet: 0 -16px 40px -12px rgb(0 0 0 / 0.8);
+  --shadow-glow-gold: 0 0 0 1px var(--color-gold-300), 0 0 18px -4px rgb(200 170 110 / 0.55);
+  --shadow-glow-hextech: 0 0 0 1px var(--color-hextech-300), 0 0 18px -4px rgb(10 200 185 / 0.55);
 }
 
+/* Fonts come from next/font in layout.tsx, which sets --font-inter and --font-cinzel on <html>. */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-*: initial;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-cinzel), Georgia, serif;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/*
+  Hextech corner cut. Used by <Card variant="framed">, the boss bar and rank emblems.
+  Size via the --chamfer variable, e.g. `chamfer [--chamfer:6px]`.
+*/
+@utility chamfer {
+  clip-path: polygon(
+    var(--chamfer, 10px) 0,
+    calc(100% - var(--chamfer, 10px)) 0,
+    100% var(--chamfer, 10px),
+    100% calc(100% - var(--chamfer, 10px)),
+    calc(100% - var(--chamfer, 10px)) 100%,
+    var(--chamfer, 10px) 100%,
+    0 calc(100% - var(--chamfer, 10px)),
+    0 var(--chamfer, 10px)
+  );
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    background-color: var(--color-abyss);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-hextech-300);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background-color: var(--color-hextech-700);
+    color: var(--color-fg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
 }

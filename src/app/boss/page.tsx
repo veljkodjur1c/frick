@@ -1,3 +1,5 @@
+import { PageHeader } from "@/components/ui";
+
 export default function BossPage() {
-  return <h1 className="text-2xl font-semibold">Boss</h1>;
+  return <PageHeader title="Boss" />;
 }
