@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { currentWeekStart, dayOfWeek, hourOf, nextWeekStart, weekEndOf, weekStartOf } from "./week";
+import { currentWeekStart, dayOfWeek, hourOf, nextWeekStart, weekEndOf, weeksBetween, weekStartOf } from "./week";
 
 // Belgrade is UTC+2 in summer (CEST) and UTC+1 in winter (CET). Inputs below are UTC instants.
 const at = (iso: string) => new Date(iso);
@@ -86,5 +86,13 @@ describe("hourOf", () => {
   it("counts midnight as 0", () => {
     // Monday 2026-10-19 00:30 CEST
     expect(hourOf(at("2026-10-18T22:30:00Z"))).toBe(0);
+  });
+});
+
+describe("weeksBetween", () => {
+  it("counts whole weeks, across the DST change", () => {
+    expect(weeksBetween("2026-10-12", "2026-10-12")).toBe(0);
+    expect(weeksBetween("2026-10-12", "2026-11-02")).toBe(3);
+    expect(weeksBetween("2026-10-19", "2026-10-12")).toBe(-1);
   });
 });
