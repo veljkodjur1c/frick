@@ -6,6 +6,9 @@ import { safeNextPath } from "@/lib/redirect";
 export default function LoginPage({ searchParams }: PageProps<"/login">) {
   return (
     <>
+      {/* The app logo (same file as the favicon, npm run icons); decorative, the title names the app. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/icons/icon.svg" alt="" width={72} height={72} className="mt-6 mb-4 size-18" />
       <PageHeader showTitle title="FRICK" subtitle="Prijavi se da vidiš taskove, bossa i ekipu." />
       {/* searchParams are request data, so with Cache Components they are read behind a boundary. */}
       <Suspense fallback={<FormSkeleton />}>
