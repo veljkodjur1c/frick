@@ -104,6 +104,10 @@ in the same PR, put it on `/design`, and say so in the PR description.
   (`weekStartOf`, `weekEndOf`, `nextWeekStart`, `currentWeekStart`, `dayOfWeek`, all Europe/Belgrade) is in
   `src/lib/game/week.ts`. Never compute week boundaries with `getDay()` or UTC dates yourself.
 - Points (`approvedPoints` for a player or the boss damage, `weeklyProgress`) are in `src/lib/game/points.ts`.
+- Rank comes only from total LP (`profiles.lp`, never below 0): Iron IV starts at 0 and every 100 LP is one division
+  up to Diamond I; Master from 2800, Grandmaster from 3200, Challenger from 3600 (PLACEHOLDER). `rankFromLp`, `nextRank`,
+  `weeklyLpChange`, `applyLpChange` and `rankChange` are in `src/lib/game/rank.ts`; show a rank with
+  `<RankBadge {...rankFromLp(lp)} />`.
 
 ## Auth & data access
 - `src/proxy.ts` refreshes the session on every request and sends logged-out users to `/login`, the only public route.
