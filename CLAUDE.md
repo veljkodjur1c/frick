@@ -19,7 +19,8 @@ UI language: Serbian (Latin script). Code, comments, commit messages, branch nam
 - `src/components/`       app frame (`AppShell`, `BottomNav`, `TopBar`)
 - `src/components/ui/`    design system: the ONLY shared UI building blocks (see "Design system" below)
 - `src/features/<name>/`  feature code (components, hooks, queries) - each person owns their features
-  (`auth`: login/sign-up form + actions, `profile`: profile form, avatar upload, `feed`: posts)
+  (`auth`: login/sign-up form + actions, `profile`: profile form, avatar upload, `feed`: posts,
+  `tasks`: weekly task list, ticking `check` tasks)
 - `src/lib/supabase/`     Supabase helpers: `client.ts` (browser), `server.ts` (server), `auth.ts` (current user),
   `proxy.ts` (session refresh), `admin.ts` (service role, server only)
 - `src/lib/cn.ts`, `src/lib/format.ts`  small helpers (class joining, Serbian number format)
