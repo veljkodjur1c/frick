@@ -27,7 +27,8 @@ export function PostCard({ author, createdAt, imageUrl, imageAlt, caption, badge
         <Avatar name={author.name} src={author.avatarUrl} />
         <div className="min-w-0 flex-1">
           <p className="truncate font-semibold text-fg">{author.name}</p>
-          <time dateTime={createdAt} className="text-sm text-fg-muted">
+          {/* "pre 5 minuta" can tick over between the server render and hydration; that's fine. */}
+          <time dateTime={createdAt} className="text-sm text-fg-muted" suppressHydrationWarning>
             {formatTimeAgo(new Date(createdAt))}
           </time>
         </div>
