@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { Button, Input, SegmentedControl, Sheet, Textarea } from "@/components/ui";
 import type { TaskScope, TaskType } from "@/features/tasks/queries";
 import { PROPOSAL_MAX_POINTS, PROPOSAL_MIN_POINTS } from "@/lib/game/config";
+import { CATEGORY_INFO, TASK_CATEGORIES, type TaskCategory } from "@/lib/game/titles";
 import { createProposal } from "./actions";
 import { PROPOSAL_DESCRIPTION_MAX_LENGTH, PROPOSAL_TITLE_MAX_LENGTH } from "./constants";
 
@@ -17,6 +18,8 @@ const SCOPES = [
   { value: "solo", label: "Samo ja" },
 ] as const;
 
+const CATEGORIES = TASK_CATEGORIES.map((value) => ({ value, label: CATEGORY_INFO[value].title }));
+
 /** "Predloži task" button and the sheet with the proposal form. */
 export function NewProposalSheet() {
   const [open, setOpen] = useState(false);
@@ -25,13 +28,16 @@ export function NewProposalSheet() {
   const [type, setType] = useState<TaskType>("check");
   const [scope, setScope] = useState<TaskScope>("team");
   const [points, setPoints] = useState("");
+  // No default: the proposer has to think about which title the task counts toward.
+  const [category, setCategory] = useState<TaskCategory | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   function submit() {
+    if (!category) return;
     setError(null);
     startTransition(async () => {
-      const result = await createProposal({ title, description, type, scope, points: Number(points) });
+      const result = await createProposal({ title, description, type, scope, points: Number(points), category });
       if (!result.ok) {
         setError(result.error);
         return;
@@ -41,6 +47,7 @@ export function NewProposalSheet() {
       setType("check");
       setScope("team");
       setPoints("");
+      setCategory(null);
       setOpen(false);
     });
   }
@@ -55,7 +62,7 @@ export function NewProposalSheet() {
         onClose={() => setOpen(false)}
         title="Novi predlog"
         footer={
-          <Button size="lg" fullWidth loading={pending} disabled={!title.trim() || !points} onClick={submit}>
+          <Button size="lg" fullWidth loading={pending} disabled={!title.trim() || !points || !category} onClick={submit}>
             Pošalji predlog
           </Button>
         }
@@ -77,6 +84,20 @@ export function NewProposalSheet() {
             disabled={pending}
             onChange={(event) => setDescription(event.target.value)}
           />
+          <div className="flex flex-col gap-1.5">
+            <span className="text-sm font-medium text-fg">Kategorija</span>
+            <SegmentedControl
+              label="Kategorija"
+              options={CATEGORIES}
+              value={category}
+              onChange={setCategory}
+              fullWidth
+              columns={2}
+            />
+            <span className="text-sm text-fg-muted">
+              {category ? CATEGORY_INFO[category].description : "Za koju titulu se task broji."}
+            </span>
+          </div>
           <div className="flex flex-col gap-1.5">
             <span className="text-sm font-medium text-fg">Kako se završava</span>
             <SegmentedControl label="Kako se završava" options={TYPES} value={type} onChange={setType} fullWidth />

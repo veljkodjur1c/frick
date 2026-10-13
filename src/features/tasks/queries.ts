@@ -1,6 +1,7 @@
 import "server-only";
 import { currentWeekStart } from "@/lib/game/week";
 import type { CompletionStatus } from "@/lib/game/points";
+import type { TaskCategory } from "@/lib/game/titles";
 import { requireUser } from "@/lib/supabase/auth";
 import { createClient } from "@/lib/supabase/server";
 
@@ -16,6 +17,8 @@ export type TaskData = {
   type: TaskType;
   scope: TaskScope;
   points: number;
+  /** Null for tasks made before categories existed; they count toward no title. */
+  category: TaskCategory | null;
   /** Status of the viewer's own completion, or null if they haven't done it. */
   myStatus: CompletionStatus | null;
 };
@@ -52,7 +55,7 @@ export async function getCurrentWeekTasks(): Promise<CurrentWeekTasks> {
 
   const { data, error } = await supabase
     .from("tasks")
-    .select("id, title, description, type, scope, points, completions(status)")
+    .select("id, title, description, type, scope, points, category, completions(status)")
     .eq("week_id", week.id)
     .or(`scope.eq.team,assignee_id.eq.${user.id}`)
     .eq("completions.user_id", user.id)
