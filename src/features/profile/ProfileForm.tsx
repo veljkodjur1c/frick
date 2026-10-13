@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState, useTransition, type ChangeEvent, type FormEvent } from "react";
-import { Avatar, Button, Input } from "@/components/ui";
+import { Avatar, Button, Input, RankBadge, Sheet } from "@/components/ui";
+import { CameraIcon } from "@/features/tasks/TaskRow";
+import { rankFromLp } from "@/lib/game/rank";
 import { createClient } from "@/lib/supabase/client";
 import { updateProfile } from "./actions";
 import { DISPLAY_NAME_MAX, displayNameError } from "./displayName";
@@ -11,54 +13,49 @@ type ProfileFormProps = {
   userId: string;
   displayName: string;
   avatarUrl: string | null;
+  lp: number;
 };
-
-type Errors = { displayName?: string; avatar?: string; form?: string };
 
 // The public bucket from supabase/migrations/*_avatars_storage.sql.
 const AVATAR_BUCKET = "avatars";
 
-export function ProfileForm({ userId, displayName: savedName, avatarUrl }: ProfileFormProps) {
-  const fileInput = useRef<HTMLInputElement>(null);
-  const [name, setName] = useState(savedName);
-  const [avatar, setAvatar] = useState<{ blob: Blob; previewUrl: string } | null>(null);
-  const [errors, setErrors] = useState<Errors>({});
-  const [saved, setSaved] = useState(false);
-  const [preparing, setPreparing] = useState(false);
+/**
+ * Top of /profile: the picture (tap it to pick a new one, saved from a sheet), the name and the rank.
+ * "Izmeni profil" opens the name field under it.
+ */
+export function ProfileForm({ userId, displayName, avatarUrl, lp }: ProfileFormProps) {
+  const [editing, setEditing] = useState(false);
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center gap-4">
+        <AvatarPicker userId={userId} displayName={displayName} avatarUrl={avatarUrl} />
+        <div className="flex min-w-0 flex-col gap-1.5">
+          <p className="truncate text-xl font-semibold text-fg">{displayName}</p>
+          <RankBadge {...rankFromLp(lp)} />
+        </div>
+      </div>
+
+      {editing ? (
+        <NameForm displayName={displayName} onDone={() => setEditing(false)} />
+      ) : (
+        <Button variant="secondary" fullWidth onClick={() => setEditing(true)}>
+          Izmeni profil
+        </Button>
+      )}
+    </div>
+  );
+}
+
+/** The name field with Otkaži / Sačuvaj. Closes itself after a save. */
+function NameForm({ displayName, onDone }: { displayName: string; onDone: () => void }) {
+  const [name, setName] = useState(displayName);
+  const [errors, setErrors] = useState<{ displayName?: string; form?: string }>({});
   const [pending, startTransition] = useTransition();
-
-  // Free the preview's memory when it is replaced or the form goes away.
-  useEffect(() => {
-    if (!avatar) return;
-    return () => URL.revokeObjectURL(avatar.previewUrl);
-  }, [avatar]);
-
   const trimmedName = name.trim();
-  const dirty = trimmedName !== savedName || avatar !== null;
-
-  async function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    // Allow picking the same file again after an error.
-    event.target.value = "";
-    if (!file) return;
-
-    setPreparing(true);
-    setSaved(false);
-    try {
-      const blob = await resizeAvatar(file);
-      setAvatar({ blob, previewUrl: URL.createObjectURL(blob) });
-      setErrors((current) => ({ ...current, avatar: undefined }));
-    } catch {
-      setErrors((current) => ({ ...current, avatar: "Ova slika ne može da se otvori. Izaberi drugu." }));
-    } finally {
-      setPreparing(false);
-    }
-  }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setSaved(false);
-
     const nameError = displayNameError(trimmedName);
     if (nameError) {
       setErrors({ displayName: nameError });
@@ -67,89 +64,172 @@ export function ProfileForm({ userId, displayName: savedName, avatarUrl }: Profi
 
     startTransition(async () => {
       try {
-        let avatarPath: string | undefined;
-        if (avatar) {
-          avatarPath = `${userId}/avatar.webp`;
-          const supabase = createClient();
-          const { error } = await supabase.storage.from(AVATAR_BUCKET).upload(avatarPath, avatar.blob, {
-            upsert: true,
-            contentType: avatar.blob.type,
-          });
-          if (error) {
-            console.error("Avatar upload failed", error);
-            setErrors({ avatar: "Slika nije poslata. Proveri internet pa probaj ponovo." });
-            return;
-          }
-        }
-
-        const result = await updateProfile({ displayName: trimmedName, avatarPath });
+        const result = await updateProfile({ displayName: trimmedName });
         if (!result.ok) {
-          setErrors({ ...result.fieldErrors, form: result.formError });
+          setErrors({ displayName: result.fieldErrors?.displayName, form: result.formError });
           return;
         }
-        setErrors({});
-        setAvatar(null);
-        setName(trimmedName);
-        setSaved(true);
+        onDone();
       } catch (error) {
-        console.error("Saving profile failed", error);
-        setErrors({ form: "Profil nije sačuvan. Probaj ponovo." });
+        console.error("Saving the name failed", error);
+        setErrors({ form: "Ime nije sačuvano. Probaj ponovo." });
       }
     });
   }
 
   return (
     <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-3">
-      <div className="flex items-center gap-4">
-        <Avatar name={trimmedName || savedName} src={avatar?.previewUrl ?? avatarUrl} size="xl" />
-        <div className="flex min-w-0 flex-col items-start gap-1">
-          <Button
-            variant="secondary"
-            size="sm"
-            loading={preparing}
-            disabled={pending}
-            onClick={() => fileInput.current?.click()}
-          >
-            Promeni sliku
-          </Button>
-          {errors.avatar ? (
-            <p role="alert" className="text-sm text-danger">
-              {errors.avatar}
-            </p>
-          ) : (
-            avatar && <p className="text-sm text-fg-muted">Nova slika se čuva kad klikneš Sačuvaj.</p>
-          )}
-        </div>
-        <input ref={fileInput} type="file" accept="image/*" hidden onChange={handleFileChange} />
-      </div>
-
       <Input
         label="Ime u igri"
         name="displayName"
         autoComplete="nickname"
+        autoFocus
         maxLength={DISPLAY_NAME_MAX}
         value={name}
-        onChange={(event) => {
-          setName(event.target.value);
-          setSaved(false);
-        }}
+        onChange={(event) => setName(event.target.value)}
         error={errors.displayName}
       />
-
       {errors.form && (
         <p role="alert" className="text-sm text-danger">
           {errors.form}
         </p>
       )}
-      {saved && (
-        <p role="status" className="text-sm text-success">
-          Profil je sačuvan.
-        </p>
-      )}
-
-      <Button type="submit" variant="primary" fullWidth loading={pending} disabled={!dirty || preparing}>
-        Sačuvaj
-      </Button>
+      <div className="grid grid-cols-2 gap-2">
+        <Button variant="ghost" disabled={pending} onClick={onDone}>
+          Otkaži
+        </Button>
+        <Button type="submit" loading={pending} disabled={trimmedName === displayName}>
+          Sačuvaj ime
+        </Button>
+      </div>
     </form>
+  );
+}
+
+/** The avatar as a button: picks a photo, shows it in a sheet and uploads it on "Sačuvaj sliku". */
+function AvatarPicker({ userId, displayName, avatarUrl }: Omit<ProfileFormProps, "lp">) {
+  const fileInput = useRef<HTMLInputElement>(null);
+  const [picked, setPicked] = useState<{ blob: Blob; previewUrl: string } | null>(null);
+  const [open, setOpen] = useState(false);
+  const [preparing, setPreparing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [pending, startTransition] = useTransition();
+
+  // Free the preview's memory when it is replaced or the picker goes away.
+  useEffect(() => {
+    if (!picked) return;
+    return () => URL.revokeObjectURL(picked.previewUrl);
+  }, [picked]);
+
+  async function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    // Allow picking the same file again after an error.
+    event.target.value = "";
+    if (!file) return;
+
+    setPreparing(true);
+    setError(null);
+    try {
+      const blob = await resizeAvatar(file);
+      setPicked({ blob, previewUrl: URL.createObjectURL(blob) });
+    } catch {
+      setPicked(null);
+      setError("Ova slika ne može da se otvori. Izaberi drugu.");
+    } finally {
+      setPreparing(false);
+      setOpen(true);
+    }
+  }
+
+  function close() {
+    if (pending) return;
+    setOpen(false);
+    setPicked(null);
+    setError(null);
+  }
+
+  function save() {
+    if (!picked) return;
+    setError(null);
+    startTransition(async () => {
+      try {
+        const avatarPath = `${userId}/avatar.webp`;
+        const { error: uploadError } = await createClient()
+          .storage.from(AVATAR_BUCKET)
+          .upload(avatarPath, picked.blob, { upsert: true, contentType: picked.blob.type });
+        if (uploadError) {
+          console.error("Avatar upload failed", uploadError);
+          setError("Slika nije poslata. Proveri internet pa probaj ponovo.");
+          return;
+        }
+
+        const result = await updateProfile({ displayName, avatarPath });
+        if (!result.ok) {
+          setError(result.fieldErrors?.avatar ?? result.formError ?? "Slika nije sačuvana. Probaj ponovo.");
+          return;
+        }
+        setOpen(false);
+        setPicked(null);
+      } catch (saveError) {
+        console.error("Saving the avatar failed", saveError);
+        setError("Slika nije sačuvana. Probaj ponovo.");
+      }
+    });
+  }
+
+  return (
+    <>
+      {/* The avatar itself is the tap target; the camera badge shows that it can be changed. */}
+      <button
+        type="button"
+        aria-label="Promeni sliku"
+        aria-busy={preparing || undefined}
+        disabled={preparing}
+        onClick={() => fileInput.current?.click()}
+        className="relative shrink-0 rounded-full focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-hextech-300"
+      >
+        <Avatar name={displayName} src={avatarUrl} size="xl" />
+        <span
+          aria-hidden
+          className="absolute -right-0.5 -bottom-0.5 flex size-8 items-center justify-center rounded-full border border-line bg-deep text-gold-200"
+        >
+          <CameraIcon className="size-4" />
+        </span>
+      </button>
+      <input ref={fileInput} type="file" accept="image/*" hidden onChange={handleFileChange} />
+
+      <Sheet
+        open={open}
+        onClose={close}
+        title="Nova slika"
+        footer={
+          <div className="flex flex-col gap-2">
+            <Button size="lg" fullWidth loading={pending} disabled={!picked} onClick={save}>
+              Sačuvaj sliku
+            </Button>
+            <Button variant="ghost" fullWidth disabled={pending} onClick={() => fileInput.current?.click()}>
+              Izaberi drugu
+            </Button>
+          </div>
+        }
+      >
+        <div className="flex flex-col items-center gap-4">
+          {picked && (
+            // Local blob preview, next/image can't optimize it.
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={picked.previewUrl}
+              alt="Izabrana slika"
+              className="size-48 rounded-full object-cover ring-1 ring-line"
+            />
+          )}
+          {error && (
+            <p role="alert" className="text-sm text-danger">
+              {error}
+            </p>
+          )}
+        </div>
+      </Sheet>
+    </>
   );
 }
