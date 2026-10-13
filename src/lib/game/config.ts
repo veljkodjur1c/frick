@@ -16,6 +16,17 @@ export const PROOF_REJECTIONS_NEEDED = Math.floor((PLAYERS - 1) / 2) + 1;
 /** Completing fewer tasks than this in a week costs LP. */
 export const MIN_TASKS_PER_WEEK = 5;
 
+/** PLACEHOLDER: LP in one division (Iron IV -> Iron III, ...). Iron IV starts at 0 LP. */
+export const LP_PER_DIVISION = 100;
+
+/**
+ * PLACEHOLDER: total LP where the apex tiers start. Diamond I ends at 7 tiers x 4 divisions x LP_PER_DIVISION
+ * = 2800, so Master starts there.
+ */
+export const MASTER_LP = 2800;
+export const GRANDMASTER_LP = 3200;
+export const CHALLENGER_LP = 3600;
+
 /** PLACEHOLDER ("+X" in CLAUDE.md): LP for each completed task. */
 export const LP_PER_TASK = 10;
 
