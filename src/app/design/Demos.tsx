@@ -9,6 +9,7 @@ import {
   SegmentedControl,
   Sheet,
 } from "@/components/ui";
+import { TaskIcon } from "@/features/tasks/TaskRow";
 import { CATEGORY_INFO, TASK_CATEGORIES, type TaskCategory } from "@/lib/game/titles";
 
 // Interactive bits of the /design page. Not for use in features.
@@ -73,6 +74,7 @@ export function TaskListDemo() {
       </ul>
       <Checkbox
         size="lg"
+        icon={<TaskIcon />}
         strike
         label='Velika kockica (size="lg"), za redove taskova'
         checked={done.big ?? false}

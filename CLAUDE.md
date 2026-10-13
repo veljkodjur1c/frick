@@ -63,7 +63,7 @@ in the same PR, put it on `/design`, and say so in the PR description.
 ### Components (`import { ... } from "@/components/ui"`)
 | Component | Use for |
 |---|---|
-| `PageHeader` | Top of every tab page (the page's only h1) |
+| `PageHeader` | Top of every page (the page's only h1). On tab pages the title is screen-reader only; `subtitle`/`action` still show. `showTitle` for login and `/design` |
 | `Button`, `buttonClasses()` | All buttons. `primary` = the one main action on a screen, `secondary`, `ghost`, `success` (Legit), `danger` (Cap). `buttonClasses()` styles a `<Link>` as a button |
 | `Card` | `default` for normal content, `inset` inside another card, `framed` (gold cut corners) only for boss/rank/awards/rewards |
 | `Badge` | Points (`gold`), scope (Tim/Solo), proof status (`pending`/`success`/`danger`) |

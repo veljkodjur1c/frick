@@ -12,10 +12,12 @@ type CheckboxProps = Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "size"
   strike?: boolean;
   /** md: small box next to the text. lg: 48px tile, same size as a `size="icon"` Button (task rows). */
   size?: "md" | "lg";
+  /** Shown in the empty box until it's ticked (e.g. a task icon in a `size="lg"` row). */
+  icon?: ReactNode;
 };
 
 /** A full-width tappable row with a checkbox. Built for `check` tasks, works for any yes/no choice. */
-export function Checkbox({ label, description, aside, strike = false, size = "md", className, ...props }: CheckboxProps) {
+export function Checkbox({ label, description, aside, strike = false, size = "md", icon, className, ...props }: CheckboxProps) {
   return (
     <label
       className={cn(
@@ -33,9 +35,14 @@ export function Checkbox({ label, description, aside, strike = false, size = "md
           "peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-hextech-300",
         )}
       >
+        {icon && <span className="text-gold-100 group-has-checked:hidden">{icon}</span>}
         <svg
           viewBox="0 0 16 16"
-          className={cn(size === "md" ? "size-4" : "size-6", "text-abyss opacity-0 transition group-has-checked:opacity-100")}
+          className={cn(
+            size === "md" ? "size-4" : "size-6",
+            "text-abyss transition",
+            icon ? "hidden group-has-checked:block" : "opacity-0 group-has-checked:opacity-100",
+          )}
         >
           <path d="M3 8.5 6.5 12 13 4.5" fill="none" stroke="currentColor" strokeWidth={2.4} strokeLinecap="round" strokeLinejoin="round" />
         </svg>

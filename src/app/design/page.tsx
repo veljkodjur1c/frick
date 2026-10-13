@@ -64,6 +64,7 @@ export default function DesignPage() {
   return (
     <div className="flex flex-col gap-8 pb-8">
       <PageHeader
+        showTitle
         title="Design system"
         subtitle="Svi zajednički delovi na jednom mestu. Ako nešto ne valja, popravlja se u src/components/ui, ne u feature-u."
       />
