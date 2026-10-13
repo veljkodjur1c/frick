@@ -1,20 +1,9 @@
 import { cn } from "@/lib/cn";
 import { formatNumber } from "@/lib/format";
+import type { RankDivision, RankTier } from "@/lib/game/rank";
 
-// When the LP/rank logic lands in src/lib/game (issue 11), move this type there and import it here.
-export type RankTier =
-  | "iron"
-  | "bronze"
-  | "silver"
-  | "gold"
-  | "platinum"
-  | "emerald"
-  | "diamond"
-  | "master"
-  | "grandmaster"
-  | "challenger";
-
-export type RankDivision = 1 | 2 | 3 | 4;
+// Re-exported so UI code keeps importing them from "@/components/ui". The LP -> rank logic is in src/lib/game/rank.ts.
+export type { RankDivision, RankTier };
 
 const TIER_LABEL: Record<RankTier, string> = {
   iron: "Iron",
@@ -39,7 +28,7 @@ const SIZES = {
 } as const;
 
 /** Rank name as text, e.g. "Gold II" or "Challenger". */
-export function rankLabel(tier: RankTier, division?: RankDivision) {
+export function rankLabel(tier: RankTier, division?: RankDivision | null) {
   return APEX_TIERS.has(tier) || !division ? TIER_LABEL[tier] : `${TIER_LABEL[tier]} ${ROMAN[division]}`;
 }
 
@@ -81,14 +70,17 @@ export function RankEmblem({ tier, className }: { tier: RankTier; className?: st
 
 type RankBadgeProps = {
   tier: RankTier;
-  /** 4 is the lowest (IV), 1 the highest (I). Ignored for Master and above. */
-  division?: RankDivision;
+  /** 4 is the lowest (IV), 1 the highest (I). Ignored for Master and above (rankFromLp() gives null there). */
+  division?: RankDivision | null;
   lp?: number;
   size?: keyof typeof SIZES;
   className?: string;
 };
 
-/** Emblem + rank name (+ LP). sm/md sit inline in lists, lg is stacked for the profile. */
+/**
+ * Emblem + rank name (+ LP). sm/md sit inline in lists, lg is stacked for the profile.
+ * From a player's total LP: <RankBadge {...rankFromLp(profile.lp)} />.
+ */
 export function RankBadge({ tier, division, lp, size = "md", className }: RankBadgeProps) {
   const s = SIZES[size];
 
