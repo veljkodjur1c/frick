@@ -129,7 +129,9 @@ in the same PR, put it on `/design`, and say so in the PR description.
 - `post-images`: private bucket, read through short-lived signed URLs created on the server.
 
 ## Conventions
-- Never push to `main`. Work on `feature/<short-name>`, open a PR, the other person reviews.
+- Never push to `main`. Work on `feature/<short-name>` and open a PR. A review by the other person is welcome but
+  not required: once lint, tests and the Vercel preview pass, the author may squash-merge their own PR.
+  For stacked PRs, merge the lower one first and point the next one at `main` before merging it.
 - Small PRs (aim for under ~300 changed lines). Merge often, pull `main` often.
 - Commit messages: imperative, English (`Add proof upload form`).
 - TypeScript strict. No `any` unless commented why.
