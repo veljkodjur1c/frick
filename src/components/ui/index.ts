@@ -16,3 +16,4 @@ export { SegmentedControl } from "./SegmentedControl";
 export { Sheet } from "./Sheet";
 export { Skeleton } from "./Skeleton";
 export { Spinner } from "./Spinner";
+export { VerdictStamp, type Verdict } from "./VerdictStamp";

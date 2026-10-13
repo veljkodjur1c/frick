@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Badge, Button } from "@/components/ui";
+import { Badge, Button, VerdictStamp } from "@/components/ui";
 import { PostCard } from "@/features/feed/PostCard";
 import type { FeedProofData } from "@/features/feed/queries";
 import { applyVote, nextVote } from "@/features/feed/votes";
@@ -10,11 +10,8 @@ import { PROOF_APPROVALS_NEEDED, PROOF_REJECTIONS_NEEDED } from "@/lib/game/conf
 import type { ProofVote } from "@/lib/game/proofs";
 import { voteOnProof } from "./actions";
 
-const STATUS_BADGE = {
-  pending: <Badge tone="pending">Na čekanju</Badge>,
-  approved: <Badge tone="success">Legit</Badge>,
-  rejected: <Badge tone="danger">Cap</Badge>,
-};
+// Decided proofs get a stamp next to the points instead of a status badge.
+const STAMP = { approved: "legit", rejected: "cap" } as const;
 
 /** A task proof in the feed. The other players vote Legit/Cap here; enough votes approve or reject it. */
 export function ProofFeedCard({ proof }: { proof: FeedProofData }) {
@@ -61,9 +58,14 @@ export function ProofFeedCard({ proof }: { proof: FeedProofData }) {
       imageAlt={`Dokaz: ${proof.task.title}`}
       caption={`Dokaz za „${proof.task.title}“`}
       badge={
-        <span className="flex gap-1.5">
+        <span className="flex items-center gap-1.5">
           <Badge tone="gold">+{points}</Badge>
-          {STATUS_BADGE[status]}
+          {status === "pending" ? (
+            <Badge tone="pending">Na čekanju</Badge>
+          ) : (
+            // Animates only when a vote here decided it, not for proofs that load already decided.
+            <VerdictStamp verdict={STAMP[status]} animate={status !== proof.status} />
+          )}
         </span>
       }
       footer={

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Badge, Button } from "@/components/ui";
+import { Button, VerdictStamp } from "@/components/ui";
 import { formatNumber } from "@/lib/format";
 import { setPostVote } from "./actions";
 import { PostCard } from "./PostCard";
@@ -10,7 +10,7 @@ import type { FeedPostData } from "./queries";
 import { applyVote, nextVote, postVerdict, type PostVote } from "./votes";
 
 /**
- * A feed post rendered as a PostCard, with Legit/Cap voting, the Valid/Freak badge and comments.
+ * A feed post rendered as a PostCard, with Legit/Cap voting, the Legit/Cap stamp in the header and comments.
  * Rendered through FeedItemCard.
  */
 export function FeedPostCard({ post }: { post: FeedPostData }) {
@@ -19,6 +19,8 @@ export function FeedPostCard({ post }: { post: FeedPostData }) {
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const verdict = postVerdict(votes);
+  // The stamp only animates when a vote here changes it, not for posts that load already voted.
+  const [initialVerdict] = useState(verdict);
 
   function vote(tapped: PostVote) {
     // Ignore taps until the last vote is saved, so a rollback can't undo a newer vote.
@@ -49,13 +51,7 @@ export function FeedPostCard({ post }: { post: FeedPostData }) {
       createdAt={post.createdAt}
       imageUrl={post.imageUrl}
       caption={post.caption}
-      badge={
-        verdict === "valid" ? (
-          <Badge tone="success">Valid</Badge>
-        ) : verdict === "freak" ? (
-          <Badge tone="danger">Freak</Badge>
-        ) : null
-      }
+      badge={verdict && <VerdictStamp key={verdict} verdict={verdict} animate={verdict !== initialVerdict} />}
       footer={
         <div className="flex flex-col gap-2">
           {post.isOwn ? (
