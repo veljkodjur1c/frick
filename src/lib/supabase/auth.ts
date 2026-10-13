@@ -1,4 +1,5 @@
 import "server-only";
+import { io } from "next/cache";
 import { redirect } from "next/navigation";
 import { cache } from "react";
 import type { User } from "@supabase/supabase-js";
@@ -12,6 +13,9 @@ import { createClient } from "./server";
  * Server Actions and Route Handlers must call this themselves; never trust a user id from the client.
  */
 export const getCurrentUser = cache(async (): Promise<User | null> => {
+  // Session checks read the clock (token expiry), which can't be prerendered into the static shell.
+  // With Cache Components this makes callers wait for a real request; it resolves at once inside one.
+  await io();
   const supabase = await createClient();
   const { data, error } = await supabase.auth.getUser();
   if (error) {
