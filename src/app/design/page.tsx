@@ -146,16 +146,19 @@ export default function DesignPage() {
         <div className="grid grid-cols-3 gap-y-4">
           {CAN_FLAVORS.map((flavor) => (
             <div key={flavor.id} className="flex flex-col items-center gap-1">
-              <MonsterCan color={flavor.color} className="h-16" />
+              <MonsterCan flavor={flavor.id} className="h-20" />
               <code className="text-xs text-fg-muted">{flavor.color}</code>
             </div>
           ))}
         </div>
         <div className="flex items-end gap-3">
-          <MonsterCan color="can-original" locked className="h-16" />
+          <MonsterCan flavor="original" locked className="h-20" />
           <p className="text-sm text-fg-muted">
             Zaključana: <code className="text-xs whitespace-nowrap">can-locked</code>. Poklopac i dno:{" "}
-            <code className="text-xs whitespace-nowrap">can-metal</code>.
+            <code className="text-xs whitespace-nowrap">can-metal</code>. Crno telo:{" "}
+            <code className="text-xs whitespace-nowrap">can-body-dark</code>. Kandže na Ultra limenkama:{" "}
+            <code className="text-xs whitespace-nowrap">can-claw-light</code>,{" "}
+            <code className="text-xs whitespace-nowrap">can-claw-silver</code>.
           </p>
         </div>
       </Section>

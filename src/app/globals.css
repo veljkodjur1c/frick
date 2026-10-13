@@ -74,6 +74,9 @@
   --color-can-ultra-gold: #e8b53a;
   --color-can-khaotic: #f08a24;
   --color-can-metal: #b9c0c7; /* lid and bottom rim */
+  --color-can-body-dark: #121519; /* black can body (Original, Khaotic) */
+  --color-can-claw-light: #eef1f4; /* white-silver claws on colored Ultra cans */
+  --color-can-claw-silver: #8d98a3; /* silver claws on the white can */
   --color-can-locked: #4b5866; /* flavor not earned yet */
 
   /* Corner radius: small things are tighter, containers are softer */

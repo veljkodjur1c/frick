@@ -94,7 +94,7 @@ function Shelves({ players, viewerId }: { players: ShelfPlayer[]; viewerId: stri
                     </p>
                     <div aria-hidden className="mt-1 flex gap-1">
                       {buildShelf(player.cans).map((slot) => (
-                        <MonsterCan key={slot.flavor.id} color={slot.flavor.color} locked={!slot.cans.length} className="h-5" />
+                        <MonsterCan key={slot.flavor.id} flavor={slot.flavor.id} locked={!slot.cans.length} className="h-6" />
                       ))}
                     </div>
                   </div>
@@ -136,7 +136,7 @@ function CanSlot({ slot }: { slot: ShelfSlot<EarnedCan> }) {
   return (
     <li className="flex min-w-0 flex-col items-center text-center">
       <div className="relative flex justify-center">
-        <MonsterCan color={slot.flavor.color} locked={!latest} className="h-20" />
+        <MonsterCan flavor={slot.flavor.id} locked={!latest} className="h-24" />
         {slot.cans.length > 1 && (
           <Badge tone="gold" className="absolute -top-1 left-full -ml-3">
             ×{formatNumber(slot.cans.length)}
