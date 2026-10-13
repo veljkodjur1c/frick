@@ -1,9 +1,12 @@
 import { Card, EmptyState, Skeleton } from "@/components/ui";
+import { syncWeekPhase } from "@/features/champ-select/weekPhase";
 import { TaskBoard } from "./TaskBoard";
 import { getCurrentWeekTasks } from "./queries";
 
 /** Reads the session, so it must sit inside a <Suspense> boundary. */
 export async function TaskList() {
+  // On Monday this turns champ select's approved proposals into this week's tasks.
+  await syncWeekPhase();
   const week = await getCurrentWeekTasks();
 
   if (week.state === "none" || (week.state === "inactive" && week.status === "finished")) {

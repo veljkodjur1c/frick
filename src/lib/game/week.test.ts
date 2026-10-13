@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { currentWeekStart, dayOfWeek, nextWeekStart, weekEndOf, weekStartOf } from "./week";
+import { currentWeekStart, dayOfWeek, hourOf, nextWeekStart, weekEndOf, weekStartOf } from "./week";
 
 // Belgrade is UTC+2 in summer (CEST) and UTC+1 in winter (CET). Inputs below are UTC instants.
 const at = (iso: string) => new Date(iso);
@@ -73,5 +73,18 @@ describe("currentWeekStart", () => {
     const start = currentWeekStart();
     expect(start).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     expect(new Date(`${start}T00:00:00Z`).getUTCDay()).toBe(1);
+  });
+});
+
+describe("hourOf", () => {
+  it("uses Belgrade time in summer and winter", () => {
+    // 16:00 UTC = 18:00 CEST, 17:00 CET
+    expect(hourOf(at("2026-10-18T16:00:00Z"))).toBe(18);
+    expect(hourOf(at("2026-11-01T16:00:00Z"))).toBe(17);
+  });
+
+  it("counts midnight as 0", () => {
+    // Monday 2026-10-19 00:30 CEST
+    expect(hourOf(at("2026-10-18T22:30:00Z"))).toBe(0);
   });
 });

@@ -99,6 +99,11 @@ in the same PR, put it on `/design`, and say so in the PR description.
 - LP: placeholder numbers until we decide: each completed task +X, fewer than 5 completed tasks in a week -Y,
   boss kill gives everyone a bonus. Keep all numbers in `src/lib/game/config.ts`.
 - Weekly awards: MVP (most points) and "Feeder of the week" (fewest points).
+- Champ select details (PLACEHOLDER numbers): opens Sunday 18:00 and closes at Monday 00:00. Each player proposes
+  tasks (title, `check`/`proof`, `team`/`solo`, 5-100 points; a solo task is for the player who proposes it) and
+  votes Za/Protiv on any proposal, their own too. A proposal with at least 3 Za votes becomes a task next week; the rest
+  are rejected. Logic in `src/lib/game/champSelect.ts`; `syncWeekPhase()` opens champ select and activates the week
+  when a page that shows week data loads, so no cron is needed for it.
 - In code: every number lives in `src/lib/game/config.ts` (undecided ones are marked PLACEHOLDER). Week math
   (`weekStartOf`, `weekEndOf`, `nextWeekStart`, `currentWeekStart`, `dayOfWeek`, all Europe/Belgrade) is in
   `src/lib/game/week.ts`. Never compute week boundaries with `getDay()` or UTC dates yourself.
@@ -111,8 +116,8 @@ in the same PR, put it on `/design`, and say so in the PR description.
 - Every Server Action checks the user itself. Never trust a user id sent from the client.
 - Normal reads/writes use `createClient()` (server or browser) and go through RLS.
 - `createAdminClient()` (`@/lib/supabase/admin`) uses the service role key and bypasses RLS. Only for server code
-  (Server Actions, Route Handlers, cron) that writes system tables (`weeks`, `bosses`, `tasks`, `awards`, `cans`),
-  after checking the user. Never import it from a Client Component.
+  (Server Actions, Route Handlers, cron, and `syncWeekPhase()` during a page render) that writes system tables
+  (`weeks`, `bosses`, `tasks`, `awards`, `cans`), after checking the user. Never import it from a Client Component.
 
 ## Storage
 - `avatars`: public bucket, `profiles.avatar_url` is a plain public URL.
