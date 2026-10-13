@@ -16,12 +16,16 @@ UI language: Serbian (Latin script). Code, comments, commit messages, branch nam
 
 ## Project structure
 - `src/app/`              routes and pages (one folder per feature: `/feed`, `/tasks`, `/boss`, `/shelf`)
-- `src/components/`       app frame (`AppShell`, `BottomNav`)
+- `src/components/`       app frame (`AppShell`, `BottomNav`, `TopBar`)
 - `src/components/ui/`    design system: the ONLY shared UI building blocks (see "Design system" below)
 - `src/features/<name>/`  feature code (components, hooks, queries) - each person owns their features
-- `src/lib/supabase/`     Supabase client helpers (browser + server)
+  (`auth`: login/sign-up form + actions, `profile`: profile form, avatar upload, `feed`: posts)
+- `src/lib/supabase/`     Supabase helpers: `client.ts` (browser), `server.ts` (server), `auth.ts` (current user),
+  `proxy.ts` (session refresh), `admin.ts` (service role, server only)
 - `src/lib/cn.ts`, `src/lib/format.ts`  small helpers (class joining, Serbian number format)
+- `src/lib/redirect.ts`   `safeNextPath()`: sanitizes `?next=` redirect targets
 - `src/lib/game/`         PURE game logic (points, boss HP, LP, rank). No DB or UI imports. Must have unit tests.
+- `scripts/`              dev scripts (`seed-dev.mjs`, `generate-icons.mjs`)
 - `supabase/migrations/`  ALL schema changes live here as SQL migrations. Never change the schema only in the dashboard.
 
 ## Design system (read before building any UI)
@@ -94,6 +98,23 @@ in the same PR, put it on `/design`, and say so in the PR description.
 - LP: placeholder numbers until we decide: each completed task +X, fewer than 5 completed tasks in a week -Y,
   boss kill gives everyone a bonus. Keep all numbers in `src/lib/game/config.ts`.
 - Weekly awards: MVP (most points) and "Feeder of the week" (fewest points).
+- In code: every number lives in `src/lib/game/config.ts` (undecided ones are marked PLACEHOLDER). Week math
+  (`weekStartOf`, `weekEndOf`, `nextWeekStart`, `currentWeekStart`, `dayOfWeek`, all Europe/Belgrade) is in
+  `src/lib/game/week.ts`. Never compute week boundaries with `getDay()` or UTC dates yourself.
+
+## Auth & data access
+- `src/proxy.ts` refreshes the session on every request and sends logged-out users to `/login`, the only public route.
+- Server code gets the user with `requireUser()` (redirects to `/login`) or `getCurrentUser()` (returns null) from
+  `@/lib/supabase/auth`. Pages calling them sit inside `<Suspense>`.
+- Every Server Action checks the user itself. Never trust a user id sent from the client.
+- Normal reads/writes use `createClient()` (server or browser) and go through RLS.
+- `createAdminClient()` (`@/lib/supabase/admin`) uses the service role key and bypasses RLS. Only for server code
+  (Server Actions, Route Handlers, cron) that writes system tables (`weeks`, `bosses`, `tasks`, `awards`, `cans`),
+  after checking the user. Never import it from a Client Component.
+
+## Storage
+- `avatars`: public bucket, `profiles.avatar_url` is a plain public URL.
+- `post-images`: private bucket, read through short-lived signed URLs created on the server.
 
 ## Conventions
 - Never push to `main`. Work on `feature/<short-name>`, open a PR, the other person reviews.
@@ -110,6 +131,9 @@ in the same PR, put it on `/design`, and say so in the PR description.
 - `npm run lint`  lint
 - `npm test`      unit tests (game logic)
 - `npx supabase db push`  apply migrations to the linked Supabase project (only migrations that are merged to main)
+- `npm run seed:dev`  dry run of the dev seed (current week, boss, tasks); `npm run seed:dev -- --yes` writes,
+  add `--reset` to recreate the week's tasks. Needs `SUPABASE_SERVICE_ROLE_KEY` in `.env.local`.
+- `npx next typegen && npx tsc --noEmit`  type check (`tsc` needs the route types from `next typegen` first)
 
 ## Before opening a PR
 Run `npm run lint` and `npm test`, check the feature on a phone-sized screen, and describe in the PR what changed and how to test it.
