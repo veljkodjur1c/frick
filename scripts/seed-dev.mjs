@@ -13,6 +13,8 @@ import { createClient } from "@supabase/supabase-js";
 
 const TIMEZONE = "Europe/Belgrade";
 const BOSS = { name: "Baron Nashor", hp: 500 };
+// Object in the public boss-images bucket (migration 20261013114549_boss_images.sql), uploaded once by hand.
+const BOSS_IMAGE = "baron-nashor.jpg";
 
 /** @type {{ title: string, type: "check" | "proof", scope: "team" | "solo", points: number }[]} */
 const TASKS = [
@@ -67,7 +69,7 @@ async function main() {
   const teamCount = TASKS.filter((t) => t.scope === "team").length;
   console.log(`Supabase project: ${url}`);
   console.log(`Week: ${startsOn} (status active)`);
-  console.log(`Boss: ${BOSS.name}, ${BOSS.hp} HP`);
+  console.log(`Boss: ${BOSS.name}, ${BOSS.hp} HP, image boss-images/${BOSS_IMAGE}`);
   console.log(
     `Tasks: ${TASKS.length} (${teamCount} team, ${TASKS.length - teamCount} solo, solo ones go to existing profiles)` +
       (reset ? ", after deleting this week's tasks and their completions" : ", skipped if the week already has tasks"),
@@ -96,7 +98,10 @@ async function main() {
     "Upsert boss",
     await supabase
       .from("bosses")
-      .upsert({ week_id: week.id, ...BOSS }, { onConflict: "week_id", ignoreDuplicates: true }),
+      .upsert(
+        { week_id: week.id, ...BOSS, image_url: `${url}/storage/v1/object/public/boss-images/${BOSS_IMAGE}` },
+        { onConflict: "week_id", ignoreDuplicates: true },
+      ),
   );
   const boss = unwrap(
     "Read boss",
