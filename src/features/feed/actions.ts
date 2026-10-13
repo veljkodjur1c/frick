@@ -5,7 +5,7 @@ import { refresh } from "next/cache";
 import { getCurrentUser } from "@/lib/supabase/auth";
 import { createClient } from "@/lib/supabase/server";
 import { CAPTION_MAX_LENGTH } from "./constants";
-import { getFeedPage, type FeedPage } from "./queries";
+import { getFeedPage, type FeedPage, type FeedProofData } from "./queries";
 import type { PostVote } from "./votes";
 
 type CreatePostInput = {
@@ -52,6 +52,15 @@ export async function loadMorePosts(before: string): Promise<FeedPage> {
   if (Number.isNaN(Date.parse(before))) throw new Error("Invalid cursor");
 
   return getFeedPage(user.id, before);
+}
+
+/** Other players' pending proofs the viewer hasn't voted on yet, for the "Čeka tvoj glas" sheet. */
+export async function loadVoteQueue(): Promise<FeedProofData[]> {
+  const user = await getCurrentUser();
+  if (!user) throw new Error("Not logged in");
+
+  const { items } = await getFeedPage(user.id, undefined, { voteQueue: true });
+  return items.filter((item): item is FeedProofData => item.kind === "proof");
 }
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;

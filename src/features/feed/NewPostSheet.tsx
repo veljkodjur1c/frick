@@ -7,9 +7,15 @@ import { createPost } from "./actions";
 import { CAPTION_MAX_LENGTH, MAX_UPLOAD_BYTES, POST_IMAGES_BUCKET } from "./constants";
 import { resizeImage } from "@/lib/resizeImage";
 
-/** "Nova objava" button and the sheet for picking a photo and writing a caption. */
-export function NewPostSheet({ userId }: { userId: string }) {
-  const [open, setOpen] = useState(false);
+type NewPostSheetProps = {
+  userId: string;
+  open: boolean;
+  /** Called on close and after the post is saved. */
+  onClose: () => void;
+};
+
+/** The sheet for picking a photo and writing a caption. Opened from the feed's action wheel. */
+export function NewPostSheet({ userId, open, onClose }: NewPostSheetProps) {
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [caption, setCaption] = useState("");
@@ -70,67 +76,64 @@ export function NewPostSheet({ userId }: { userId: string }) {
       }
 
       reset();
-      setOpen(false);
+      onClose();
     });
   }
 
   return (
-    <>
-      <Button onClick={() => setOpen(true)}>Nova objava</Button>
-      <Sheet
-        open={open}
-        onClose={() => setOpen(false)}
-        title="Nova objava"
-        footer={
-          <Button size="lg" fullWidth loading={pending} disabled={!file} onClick={submit}>
-            Objavi
-          </Button>
-        }
-      >
-        <div className="flex flex-col gap-4">
-          <input
-            ref={fileInput}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={(event) => {
-              pickFile(event.target.files?.[0] ?? null);
-              // Clear it so picking the same file again still fires onChange.
-              event.target.value = "";
-            }}
-          />
+    <Sheet
+      open={open}
+      onClose={onClose}
+      title="Nova objava"
+      footer={
+        <Button size="lg" fullWidth loading={pending} disabled={!file} onClick={submit}>
+          Objavi
+        </Button>
+      }
+    >
+      <div className="flex flex-col gap-4">
+        <input
+          ref={fileInput}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(event) => {
+            pickFile(event.target.files?.[0] ?? null);
+            // Clear it so picking the same file again still fires onChange.
+            event.target.value = "";
+          }}
+        />
 
-          {previewUrl ? (
-            <div className="flex flex-col gap-2">
-              {/* Local blob preview, next/image can't optimize it. */}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={previewUrl} alt="Izabrana slika" className="aspect-4/5 w-full rounded-lg object-cover" />
-              <Button variant="ghost" disabled={pending} onClick={() => fileInput.current?.click()}>
-                Promeni sliku
-              </Button>
-            </div>
-          ) : (
-            <Button variant="secondary" size="lg" fullWidth onClick={() => fileInput.current?.click()}>
-              Izaberi sliku
+        {previewUrl ? (
+          <div className="flex flex-col gap-2">
+            {/* Local blob preview, next/image can't optimize it. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={previewUrl} alt="Izabrana slika" className="aspect-4/5 w-full rounded-lg object-cover" />
+            <Button variant="ghost" disabled={pending} onClick={() => fileInput.current?.click()}>
+              Promeni sliku
             </Button>
-          )}
+          </div>
+        ) : (
+          <Button variant="secondary" size="lg" fullWidth onClick={() => fileInput.current?.click()}>
+            Izaberi sliku
+          </Button>
+        )}
 
-          <Textarea
-            label="Opis"
-            hint="Nije obavezno"
-            value={caption}
-            maxLength={CAPTION_MAX_LENGTH}
-            disabled={pending}
-            onChange={(event) => setCaption(event.target.value)}
-          />
+        <Textarea
+          label="Opis"
+          hint="Nije obavezno"
+          value={caption}
+          maxLength={CAPTION_MAX_LENGTH}
+          disabled={pending}
+          onChange={(event) => setCaption(event.target.value)}
+        />
 
-          {error && (
-            <p role="alert" className="text-sm text-danger">
-              {error}
-            </p>
-          )}
-        </div>
-      </Sheet>
-    </>
+        {error && (
+          <p role="alert" className="text-sm text-danger">
+            {error}
+          </p>
+        )}
+      </div>
+    </Sheet>
   );
 }
