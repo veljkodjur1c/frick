@@ -1,4 +1,4 @@
-# Nexus (working title)
+# FRICK
 
 Private mini social app for 5 friends. Each week the team gets a list of tasks (some shared, some individual).
 Every completed task deals damage to a weekly League of Legends boss. If the team's combined points reach
