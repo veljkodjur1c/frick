@@ -19,7 +19,8 @@ UI language: Serbian (Latin script). Code, comments, commit messages, branch nam
 - `src/components/`       app frame (`AppShell`, `BottomNav`, `TopBar`)
 - `src/components/ui/`    design system: the ONLY shared UI building blocks (see "Design system" below)
 - `src/features/<name>/`  feature code (components, hooks, queries) - each person owns their features
-  (`auth`: login/sign-up form + actions, `profile`: profile form, avatar upload, `feed`: posts)
+  (`auth`: login/sign-up form + actions, `profile`: profile form, avatar upload, `feed`: posts,
+  `tasks`: weekly task list, ticking `check` tasks)
 - `src/lib/supabase/`     Supabase helpers: `client.ts` (browser), `server.ts` (server), `auth.ts` (current user),
   `proxy.ts` (session refresh), `admin.ts` (service role, server only)
 - `src/lib/cn.ts`, `src/lib/format.ts`  small helpers (class joining, Serbian number format)
@@ -101,6 +102,7 @@ in the same PR, put it on `/design`, and say so in the PR description.
 - In code: every number lives in `src/lib/game/config.ts` (undecided ones are marked PLACEHOLDER). Week math
   (`weekStartOf`, `weekEndOf`, `nextWeekStart`, `currentWeekStart`, `dayOfWeek`, all Europe/Belgrade) is in
   `src/lib/game/week.ts`. Never compute week boundaries with `getDay()` or UTC dates yourself.
+- Points (`approvedPoints` for a player or the boss damage, `weeklyProgress`) are in `src/lib/game/points.ts`.
 
 ## Auth & data access
 - `src/proxy.ts` refreshes the session on every request and sends logged-out users to `/login`, the only public route.
