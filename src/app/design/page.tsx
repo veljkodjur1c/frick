@@ -9,6 +9,7 @@ import {
   Card,
   Divider,
   EmptyState,
+  HextechFab,
   Input,
   PageHeader,
   ProgressBar,
@@ -131,6 +132,25 @@ export default function DesignPage() {
         <Link href="/tasks" className={buttonClasses({ variant: "secondary", fullWidth: true })}>
           Link koji izgleda kao dugme
         </Link>
+      </Section>
+
+      <Section title="Plutajuće dugme">
+        <div className="flex items-end gap-8">
+          {[
+            { label: "Obično", props: {} },
+            { label: "Čeka glas", props: { glow: true, count: 3 } },
+            { label: "Otvoren točak", props: { open: true } },
+          ].map(({ label, props }) => (
+            <div key={label} className="flex flex-col items-center gap-2">
+              <HextechFab label={label} icon={<span className="text-2xl leading-none font-bold">+</span>} {...props} />
+              <span className="text-xs text-fg-muted">{label}</span>
+            </div>
+          ))}
+        </div>
+        <p className="text-sm text-fg-muted">
+          <code className="text-xs">HextechFab</code>: glavna akcija ekrana, fiksirana iznad donje navigacije (feed). Tap
+          pušta Hextech talas.
+        </p>
       </Section>
 
       <Section title="Bedževi">
