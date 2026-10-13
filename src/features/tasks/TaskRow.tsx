@@ -3,6 +3,7 @@
 import { useState, useTransition, type ReactNode } from "react";
 import { Badge, Checkbox } from "@/components/ui";
 import { ProofUploadSheet } from "@/features/proofs/ProofUploadSheet";
+import { CategoryBadge } from "@/features/titles/CategoryIcon";
 import { formatNumber } from "@/lib/format";
 import type { CompletionStatus } from "@/lib/game/points";
 import { setCheckTaskDone } from "./actions";
@@ -80,6 +81,7 @@ function TaskMeta({ task, children }: { task: TaskData; children?: ReactNode }) 
       {task.description && <span className="block text-sm text-fg-muted">{task.description}</span>}
       <span className="mt-1.5 flex flex-wrap gap-1.5">
         <Badge tone={task.scope === "team" ? "hextech" : "neutral"}>{task.scope === "team" ? "Tim" : "Solo"}</Badge>
+        {task.category && <CategoryBadge category={task.category} />}
         {children}
       </span>
     </>

@@ -1,6 +1,7 @@
 import "server-only";
 import type { TaskScope, TaskType } from "@/features/tasks/queries";
 import { champSelectWeekStart } from "@/lib/game/champSelect";
+import type { TaskCategory } from "@/lib/game/titles";
 import { requireUser } from "@/lib/supabase/auth";
 import { createClient } from "@/lib/supabase/server";
 
@@ -18,6 +19,8 @@ export type ProposalData = {
   type: TaskType;
   scope: TaskScope;
   points: number;
+  /** Null only for proposals made before categories existed. */
+  category: TaskCategory | null;
   proposer: { displayName: string; avatarUrl: string | null };
   /** The viewer proposed it (so they can delete it). */
   isOwn: boolean;
@@ -35,6 +38,7 @@ type ProposalRow = {
   type: TaskType;
   scope: TaskScope;
   points: number;
+  category: TaskCategory | null;
   proposed_by: string;
   proposer: { display_name: string; avatar_url: string | null };
   votes: Array<{ voter_id: string; approve: boolean }>;
@@ -62,7 +66,7 @@ export async function getChampSelect(): Promise<ChampSelectData> {
   const { data, error } = await supabase
     .from("task_proposals")
     .select(
-      "id, title, description, type, scope, points, proposed_by, " +
+      "id, title, description, type, scope, points, category, proposed_by, " +
         "proposer:profiles!task_proposals_proposed_by_fkey(display_name, avatar_url), " +
         "votes:task_votes(voter_id, approve)",
     )
@@ -78,6 +82,7 @@ export async function getChampSelect(): Promise<ChampSelectData> {
     type: row.type,
     scope: row.scope,
     points: row.points,
+    category: row.category,
     proposer: { displayName: row.proposer.display_name, avatarUrl: row.proposer.avatar_url },
     isOwn: row.proposed_by === user.id,
     votes: {

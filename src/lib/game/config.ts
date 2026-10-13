@@ -69,3 +69,6 @@ export const CAN_PITY_DUPLICATES = 3;
 
 /** Duplicates spent to craft one new can. */
 export const CAN_CRAFT_COST = 3;
+
+/** Approved tasks of one category (all time) a player needs before they can hold that category's title. */
+export const TITLE_MIN_TASKS = 3;

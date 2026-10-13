@@ -21,7 +21,8 @@ UI language: Serbian (Latin script). Code, comments, commit messages, branch nam
 - `src/features/<name>/`  feature code (components, hooks, queries) - each person owns their features
   (`auth`: login/sign-up form + actions, `profile`: profile form, avatar upload, `feed`: posts,
   `tasks`: weekly task list, ticking `check` tasks, `champ-select`: proposals and votes,
-  `week`: `syncWeekPhase()` moves the weeks along: settlement, activation, boss, champ select)
+  `week`: `syncWeekPhase()` moves the weeks along: settlement, activation, boss, champ select,
+  `titles`: category icons/badges, reading the current title holders, the profile's title banners)
 - `src/lib/supabase/`     Supabase helpers: `client.ts` (browser), `server.ts` (server), `auth.ts` (current user),
   `proxy.ts` (session refresh), `admin.ts` (service role, server only)
 - `src/lib/cn.ts`, `src/lib/format.ts`  small helpers (class joining, Serbian number format)
@@ -97,6 +98,12 @@ in the same PR, put it on `/design`, and say so in the PR description.
   4 members vote Legit; majority Cap (3 of the other 4) rejects it. Unvoted proofs are auto-accepted at week end.
   After a Cap the player may send a new photo while the week is active. Others vote on proofs in the feed.
 - Each task has `points` and a `scope` (`team` = everyone has it, `solo` = one person).
+- Each task has a `category`: `caffeine` (Caffeine addict), `gym` (Gymbro), `grind` (Grinder), `chef` (Masterchef),
+  `random` (Randomac). The proposer picks it in champ select. Tasks from before categories existed have none.
+- Titles: the player with the most approved tasks of a category, all time, holds that category's title, from
+  `TITLE_MIN_TASKS` (3) tasks on. Ties share the title; a player can hold several. Nothing is stored: titles are
+  computed from the `category_counts` view (`categoryTitles()` in `src/lib/game/titles.ts`). Shown as banners on the profile and,
+  the player's strongest title only, next to their name in the feed.
 - Boss dies if total approved points >= boss HP at week end.
 - LP: placeholder numbers until we decide: each completed task +X, fewer than 5 completed tasks in a week -Y,
   boss kill gives everyone a bonus. Keep all numbers in `src/lib/game/config.ts`.
@@ -117,7 +124,7 @@ in the same PR, put it on `/design`, and say so in the PR description.
   It settles weeks that have ended (`finish_week()`), creates the current week if champ select never opened, activates
   it (`activate_week()`), gives it its boss and opens Sunday's champ select. Each step is idempotent.
 - Champ select details (PLACEHOLDER numbers): opens Sunday 18:00 and closes at Monday 00:00. Each player proposes
-  tasks (title, `check`/`proof`, `team`/`solo`, 5-100 points; a solo task is for the player who proposes it) and
+  tasks (title, category, `check`/`proof`, `team`/`solo`, 5-100 points; a solo task is for the player who proposes it) and
   votes Za/Protiv on any proposal, their own too. A proposal with at least 3 Za votes becomes a task next week; the rest
   are rejected. Logic in `src/lib/game/champSelect.ts`.
 - In code: every number lives in `src/lib/game/config.ts` (undecided ones are marked PLACEHOLDER). Week math
