@@ -6,7 +6,7 @@ import { safeNextPath } from "@/lib/redirect";
 export default function LoginPage({ searchParams }: PageProps<"/login">) {
   return (
     <>
-      <PageHeader showTitle title="Nexus" subtitle="Prijavi se da vidiš taskove, bossa i ekipu." />
+      <PageHeader showTitle title="FRICK" subtitle="Prijavi se da vidiš taskove, bossa i ekipu." />
       {/* searchParams are request data, so with Cache Components they are read behind a boundary. */}
       <Suspense fallback={<FormSkeleton />}>
         <LoginForm searchParams={searchParams} />

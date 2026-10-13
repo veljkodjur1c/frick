@@ -25,7 +25,7 @@ import { CAN_FLAVORS } from "@/lib/game/cans";
 import { TASK_CATEGORIES } from "@/lib/game/titles";
 import { BossDemo, CategoryPickerDemo, SheetDemo, TaskListDemo } from "./Demos";
 
-export const metadata: Metadata = { title: "Design system · Nexus" };
+export const metadata: Metadata = { title: "Design system · FRICK" };
 
 // Dev page: every shared component in one place, so both of us can check the look.
 // Not linked from the nav. Open /design.

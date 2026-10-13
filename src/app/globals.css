@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /*
-  Nexus design tokens (dark only). Rules live in CLAUDE.md -> "Design system".
+  FRICK design tokens (dark only). Rules live in CLAUDE.md -> "Design system".
 
   - Features style things ONLY with these tokens, through Tailwind classes:
     bg-surface, text-fg-muted, border-line, text-gold-300, rounded-lg, shadow-card ...
