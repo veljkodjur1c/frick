@@ -1,29 +1,14 @@
-import Link from "next/link";
-import { buttonClasses, Card, EmptyState, Skeleton } from "@/components/ui";
-import { getCurrentUser } from "@/lib/supabase/auth";
+import { Card, EmptyState, Skeleton } from "@/components/ui";
+import { requireUser } from "@/lib/supabase/auth";
 import { FeedPostCard } from "./FeedPostCard";
 import { LoadMorePosts } from "./LoadMorePosts";
 import { getFeedPage } from "./queries";
 
 /** Reads the session, so it must sit inside a <Suspense> boundary. */
 export async function FeedList() {
-  const user = await getCurrentUser();
+  const user = await requireUser();
 
-  if (!user) {
-    return (
-      <EmptyState
-        title="Nisi prijavljen"
-        description="Prijavi se da vidiš šta ekipa objavljuje."
-        action={
-          <Link href="/login" className={buttonClasses({ variant: "primary" })}>
-            Prijavi se
-          </Link>
-        }
-      />
-    );
-  }
-
-  const { posts, nextCursor } = await getFeedPage();
+  const { posts, nextCursor } = await getFeedPage(user.id);
 
   if (posts.length === 0) {
     return (

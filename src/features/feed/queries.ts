@@ -1,6 +1,7 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { FEED_PAGE_SIZE, POST_IMAGES_BUCKET } from "./constants";
+import type { PostVote, VoteTally } from "./votes";
 
 export type FeedPostData = {
   id: string;
@@ -9,6 +10,9 @@ export type FeedPostData = {
   /** Signed URL, valid for SIGNED_URL_TTL seconds. Null if signing failed (e.g. the file is gone). */
   imageUrl: string | null;
   author: { displayName: string; avatarUrl: string | null };
+  /** The viewer wrote this post (so they can't vote on it). */
+  isOwn: boolean;
+  votes: VoteTally;
 };
 
 export type FeedPage = {
@@ -19,24 +23,29 @@ export type FeedPage = {
 
 type PostRow = {
   id: string;
+  user_id: string;
   caption: string | null;
   image_path: string;
   created_at: string;
   author: { display_name: string; avatar_url: string | null };
+  votes: Array<{ voter_id: string; vote: PostVote }>;
 };
 
 const SIGNED_URL_TTL = 60 * 60;
 
 /**
- * One page of posts, newest first, with author and a signed photo URL.
- * `before` is the cursor from the previous page (a created_at). Caller must check the user is logged in.
+ * One page of posts, newest first, with author, a signed photo URL and the Legit/Cap votes.
+ * `viewerId` is the logged-in user (the caller must have checked it); `before` is the cursor from the previous page.
  */
-export async function getFeedPage(before?: string): Promise<FeedPage> {
+export async function getFeedPage(viewerId: string, before?: string): Promise<FeedPage> {
   const supabase = await createClient();
 
   let query = supabase
     .from("posts")
-    .select("id, caption, image_path, created_at, author:profiles!posts_user_id_fkey(display_name, avatar_url)")
+    .select(
+      "id, user_id, caption, image_path, created_at, " +
+        "author:profiles!posts_user_id_fkey(display_name, avatar_url), votes:post_votes(voter_id, vote)",
+    )
     .order("created_at", { ascending: false })
     // One extra row tells us whether there is another page.
     .limit(FEED_PAGE_SIZE + 1);
@@ -66,6 +75,12 @@ export async function getFeedPage(before?: string): Promise<FeedPage> {
     createdAt: row.created_at,
     imageUrl: urlByPath.get(row.image_path) ?? null,
     author: { displayName: row.author.display_name, avatarUrl: row.author.avatar_url },
+    isOwn: row.user_id === viewerId,
+    votes: {
+      legit: row.votes.filter((v) => v.vote === "legit").length,
+      cap: row.votes.filter((v) => v.vote === "cap").length,
+      mine: row.votes.find((v) => v.voter_id === viewerId)?.vote ?? null,
+    },
   }));
 
   return { posts, nextCursor };
