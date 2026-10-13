@@ -5,15 +5,17 @@ import { Badge, Button } from "@/components/ui";
 import { formatNumber } from "@/lib/format";
 import { setPostVote } from "./actions";
 import { PostCard } from "./PostCard";
+import { PostCommentsSheet } from "./PostCommentsSheet";
 import type { FeedPostData } from "./queries";
 import { applyVote, nextVote, postVerdict, type PostVote } from "./votes";
 
 /**
- * A feed post rendered as a PostCard, with Legit/Cap voting and the Valid/Freak badge.
+ * A feed post rendered as a PostCard, with Legit/Cap voting, the Valid/Freak badge and comments.
  * Rendered through FeedItemCard.
  */
 export function FeedPostCard({ post }: { post: FeedPostData }) {
   const [votes, setVotes] = useState(post.votes);
+  const [commentCount, setCommentCount] = useState(post.commentCount);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const verdict = postVerdict(votes);
@@ -50,14 +52,14 @@ export function FeedPostCard({ post }: { post: FeedPostData }) {
         ) : null
       }
       footer={
-        post.isOwn ? (
-          <p className="text-sm text-fg-muted tabular-nums">
-            {votes.legit + votes.cap === 0
-              ? "Još niko nije glasao."
-              : `Legit ${formatNumber(votes.legit)} · Cap ${formatNumber(votes.cap)}`}
-          </p>
-        ) : (
-          <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2">
+          {post.isOwn ? (
+            <p className="text-sm text-fg-muted tabular-nums">
+              {votes.legit + votes.cap === 0
+                ? "Još niko nije glasao."
+                : `Legit ${formatNumber(votes.legit)} · Cap ${formatNumber(votes.cap)}`}
+            </p>
+          ) : (
             <div className="grid grid-cols-2 gap-2">
               <Button
                 variant={votes.mine === "legit" ? "success" : "secondary"}
@@ -74,13 +76,14 @@ export function FeedPostCard({ post }: { post: FeedPostData }) {
                 Cap <span className="tabular-nums">{formatNumber(votes.cap)}</span>
               </Button>
             </div>
-            {error && (
-              <p role="alert" className="text-sm text-danger">
-                {error}
-              </p>
-            )}
-          </div>
-        )
+          )}
+          {error && (
+            <p role="alert" className="text-sm text-danger">
+              {error}
+            </p>
+          )}
+          <PostCommentsSheet postId={post.id} count={commentCount} onCountChange={setCommentCount} />
+        </div>
       }
     />
   );

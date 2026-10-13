@@ -19,6 +19,7 @@ export type FeedPostData = {
   /** The viewer wrote this post (so they can't vote on it). */
   isOwn: boolean;
   votes: VoteTally;
+  commentCount: number;
 };
 
 /** A photo proof for a task (a completion with proof_path), voted Legit/Cap by the other players. */
@@ -54,6 +55,8 @@ type PostRow = {
   created_at: string;
   author: AuthorRow;
   votes: VoteRow[];
+  /** post_comments(count) returns one row with the count. */
+  comments: Array<{ count: number }>;
 };
 
 type ProofRow = {
@@ -81,7 +84,8 @@ export async function getFeedPage(viewerId: string, before?: string): Promise<Fe
     .from("posts")
     .select(
       "id, user_id, caption, image_path, created_at, " +
-        "author:profiles!posts_user_id_fkey(display_name, avatar_url), votes:post_votes(voter_id, vote)",
+        "author:profiles!posts_user_id_fkey(display_name, avatar_url), votes:post_votes(voter_id, vote), " +
+        "comments:post_comments(count)",
     )
     .order("created_at", { ascending: false })
     .limit(FEED_PAGE_SIZE + 1);
@@ -133,7 +137,13 @@ export async function getFeedPage(viewerId: string, before?: string): Promise<Fe
       votes: tally(row.votes, viewerId),
     };
     return row.kind === "post"
-      ? { ...shared, kind: "post", caption: row.caption, imageUrl: postUrls.get(row.image_path) ?? null }
+      ? {
+          ...shared,
+          kind: "post",
+          caption: row.caption,
+          imageUrl: postUrls.get(row.image_path) ?? null,
+          commentCount: row.comments[0]?.count ?? 0,
+        }
       : {
           ...shared,
           kind: "proof",
