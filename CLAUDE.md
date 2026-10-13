@@ -111,6 +111,12 @@ in the same PR, put it on `/design`, and say so in the PR description.
   boss kill gives everyone a bonus. Keep all numbers in `src/lib/game/config.ts`.
 - Weekly awards: MVP (most points) and "Feeder of the week" (fewest points). Ties share the award; no awards when
   everyone has the same points.
+- Announcer: game events shown as cards in the feed, between posts. A task counts from when it is approved (the tick,
+  the deciding Legit vote, or the week's end). First Blood: the week's first task to count. Last hit: the task that
+  brings the team's damage up to the boss HP. Pentakill: all 5 players did a task on the same day (Belgrade time, by
+  when it was done; can happen on several days). Shutdown: decided at week end, a Feeder of the previous week ends the
+  week with more points than every MVP of the previous week. Nothing is stored: `announcerEvents()` in
+  `src/lib/game/announcer.ts` computes them from the completions, so an unticked task moves or removes an event.
 - Week end (settlement, `settleWeek()` in `src/lib/game/settlement.ts`): proofs still pending are accepted, the boss
   result is decided, every player's LP changes, awards are given, and on a boss kill every player gets a random can
   (see Monster cans). Each week's boss comes from `BOSS_ROTATION` in `config.ts` (`bossForWeek()`).
