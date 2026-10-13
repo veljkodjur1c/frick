@@ -63,7 +63,7 @@ export function CraftSheet({ spareCount }: { spareCount: number }) {
       >
         {flavor ? (
           <div className="flex flex-col items-center gap-3 py-4 text-center">
-            <MonsterCan color={flavor.color} className="h-32 animate-can-reveal" />
+            <MonsterCan flavor={flavor.id} className="h-36 animate-can-reveal" />
             <p className="font-display text-xl font-semibold text-gold-200">{flavor.name}</p>
             <p className={cn("text-sm font-semibold", RARITY_TEXT[flavor.rarity])}>{RARITY_LABEL[flavor.rarity]}</p>
           </div>
