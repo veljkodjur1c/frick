@@ -18,6 +18,7 @@ import {
   type RankTier,
 } from "@/components/ui";
 import { MonsterCan } from "@/features/shelf/MonsterCan";
+import { CameraIcon } from "@/features/tasks/TaskRow";
 import { CategoryBadge, TitleBadge } from "@/features/titles/CategoryIcon";
 import { TitleBannerList } from "@/features/titles/TitleBanners";
 import { CAN_FLAVORS } from "@/lib/game/cans";
@@ -112,6 +113,15 @@ export default function DesignPage() {
           <Button size="lg">Veliko</Button>
           <Button loading>Šaljem</Button>
           <Button disabled>Zaključano</Button>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button variant="secondary" size="icon" aria-label="Pošalji dokaz">
+            <CameraIcon />
+          </Button>
+          <Button variant="danger" size="icon" aria-label="Pošalji novi dokaz">
+            <CameraIcon />
+          </Button>
+          <span className="text-sm text-fg-muted">size=&quot;icon&quot;: pločica 48px, samo ikonica (sa aria-label)</span>
         </div>
         <Button fullWidth size="lg">
           Pošalji dokaz

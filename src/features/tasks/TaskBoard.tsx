@@ -1,7 +1,7 @@
 "use client";
 
 import { useOptimistic, useState } from "react";
-import { Card, EmptyState, ProgressBar, SegmentedControl } from "@/components/ui";
+import { Badge, Card, EmptyState, ProgressBar, SegmentedControl } from "@/components/ui";
 import { weeklyProgress, type WeeklyProgress } from "@/lib/game/points";
 import { formatNumber } from "@/lib/format";
 import type { TaskData, TaskScope } from "./queries";
@@ -40,15 +40,13 @@ export function TaskBoard({ tasks }: { tasks: TaskData[] }) {
             description="Prebaci na Svi da vidiš sve taskove ove nedelje."
           />
         ) : (
-          <Card padding="sm">
-            <ul className="flex flex-col divide-y divide-line">
-              {visible.map((task) => (
-                <li key={task.id}>
-                  <TaskRow task={task} onOptimisticDone={(done) => setTaskDone({ id: task.id, done })} />
-                </li>
-              ))}
-            </ul>
-          </Card>
+          <ul className="flex flex-col gap-2">
+            {visible.map((task) => (
+              <li key={task.id}>
+                <TaskRow task={task} onOptimisticDone={(done) => setTaskDone({ id: task.id, done })} />
+              </li>
+            ))}
+          </ul>
         )}
       </div>
     </div>
@@ -59,23 +57,31 @@ function ProgressCard({ progress }: { progress: WeeklyProgress }) {
   const { doneCount, totalCount, points, tasksUntilMinimum } = progress;
 
   return (
-    <Card className="flex flex-col gap-3">
-      <div className="flex items-baseline justify-between gap-3">
-        <span className="text-sm text-fg-muted">Moji poeni ove nedelje</span>
-        <span className="text-2xl font-semibold text-gold-200 tabular-nums">{formatNumber(points)}</span>
+    <Card className="flex flex-col gap-4">
+      <div className="flex items-end justify-between gap-3">
+        <div className="flex flex-col gap-1">
+          <span className="text-sm font-semibold text-gold-300">Moji poeni ove nedelje</span>
+          <span className="flex items-baseline gap-1.5">
+            <span className="text-5xl leading-none font-bold text-gold-200 tabular-nums">{formatNumber(points)}</span>
+            <span className="text-base text-fg-muted">{pointWord(points)}</span>
+          </span>
+        </div>
+        {tasksUntilMinimum > 0 ? (
+          <Badge tone="pending">
+            Još {formatNumber(tasksUntilMinimum)} {taskWord(tasksUntilMinimum)} do minimuma
+          </Badge>
+        ) : (
+          <Badge tone="success">Minimum ispunjen</Badge>
+        )}
       </div>
-      <ProgressBar
-        label={`Završeno ${formatNumber(doneCount)} od ${formatNumber(totalCount)}`}
-        value={doneCount}
-        max={totalCount}
-      />
-      <p className="text-sm text-fg-muted">
-        {tasksUntilMinimum > 0
-          ? `Još ${formatNumber(tasksUntilMinimum)} ${taskWord(tasksUntilMinimum)} do minimuma.`
-          : "Minimum za ovu nedelju je ispunjen."}
-      </p>
+      <ProgressBar label="Završeni taskovi" showValue value={doneCount} max={totalCount} />
     </Card>
   );
+}
+
+/** Serbian plural: 1 poen, 2 poena, 5 poena (11 poena). */
+function pointWord(count: number): string {
+  return count % 10 === 1 && count % 100 !== 11 ? "poen" : "poena";
 }
 
 /** Serbian plural: 1 task, 2 taska, 5 taskova (11-14 taskova). */

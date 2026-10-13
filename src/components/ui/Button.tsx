@@ -3,7 +3,7 @@ import { cn } from "@/lib/cn";
 import { Spinner } from "./Spinner";
 
 export type ButtonVariant = "primary" | "secondary" | "ghost" | "success" | "danger";
-export type ButtonSize = "sm" | "md" | "lg";
+export type ButtonSize = "sm" | "md" | "lg" | "icon";
 
 const VARIANTS: Record<ButtonVariant, string> = {
   // The one main action on a screen (Pošalji, Završi task).
@@ -24,6 +24,8 @@ const SIZES: Record<ButtonSize, string> = {
   sm: "h-9 gap-1.5 px-3 text-sm",
   md: "h-11 gap-2 px-4 text-sm",
   lg: "h-12 gap-2 px-5 text-base",
+  // Square 48px tile with only an icon (e.g. the camera on a proof task). Give it an aria-label.
+  icon: "size-12 shrink-0",
 };
 
 type ButtonStyleOptions = {

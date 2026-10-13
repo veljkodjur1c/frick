@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useRef, useState, useTransition, type ReactNode } from "react";
 import { Badge, Button, Sheet } from "@/components/ui";
 import { formatNumber } from "@/lib/format";
 import { PROOF_APPROVALS_NEEDED } from "@/lib/game/config";
@@ -15,10 +15,12 @@ type ProofUploadSheetProps = {
   points: number;
   /** The last proof got Capped, so this is a second try. */
   retry?: boolean;
+  /** Draws the button that opens the sheet instead of the default "Pošalji dokaz" (e.g. the camera tile in TaskRow). */
+  trigger?: (open: () => void) => ReactNode;
 };
 
 /** "Pošalji dokaz" button on a proof task and the sheet for picking the photo. */
-export function ProofUploadSheet({ taskId, taskTitle, points, retry = false }: ProofUploadSheetProps) {
+export function ProofUploadSheet({ taskId, taskTitle, points, retry = false, trigger }: ProofUploadSheetProps) {
   const [open, setOpen] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -87,9 +89,13 @@ export function ProofUploadSheet({ taskId, taskTitle, points, retry = false }: P
 
   return (
     <>
-      <Button variant="secondary" className="mt-2" onClick={() => setOpen(true)}>
-        {retry ? "Pošalji novi dokaz" : "Pošalji dokaz"}
-      </Button>
+      {trigger ? (
+        trigger(() => setOpen(true))
+      ) : (
+        <Button variant="secondary" className="mt-2" onClick={() => setOpen(true)}>
+          {retry ? "Pošalji novi dokaz" : "Pošalji dokaz"}
+        </Button>
+      )}
       <Sheet
         open={open}
         onClose={() => setOpen(false)}

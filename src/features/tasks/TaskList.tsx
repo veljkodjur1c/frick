@@ -71,18 +71,18 @@ async function currentWeekContent() {
 export function TaskListSkeleton() {
   return (
     <div className="flex flex-col gap-6">
-      <Card className="flex flex-col gap-3">
-        <Skeleton className="h-6 w-40" />
+      <Card className="flex flex-col gap-4">
+        <Skeleton className="h-4 w-40" />
+        <Skeleton className="h-12 w-28" />
         <Skeleton className="h-2.5 w-full" rounded="full" />
-        <Skeleton className="h-4 w-48" />
       </Card>
       <div className="flex flex-col gap-3">
         <Skeleton className="h-11 w-full" />
-        <Card padding="sm" className="flex flex-col gap-4">
+        <div className="flex flex-col gap-2">
           {[0, 1, 2, 3].map((key) => (
-            <Skeleton key={key} className="h-11 w-full" />
+            <Skeleton key={key} className="h-24 w-full" />
           ))}
-        </Card>
+        </div>
       </div>
     </div>
   );

@@ -71,6 +71,13 @@ export function TaskListDemo() {
           </li>
         ))}
       </ul>
+      <Checkbox
+        size="lg"
+        strike
+        label='Velika kockica (size="lg"), za redove taskova'
+        checked={done.big ?? false}
+        onChange={(e) => setDone((prev) => ({ ...prev, big: e.target.checked }))}
+      />
     </div>
   );
 }
