@@ -44,7 +44,7 @@ type VerdictStampProps = {
 };
 
 /**
- * Voted result as a tilted Hextech hexagon with a shield (Legit) or a cap (Cap), no text (the name is the
+ * Voted result as an upright Hextech hexagon with a shield (Legit) or a cap (Cap), no text (the name is the
  * accessible label). Sits on the right of a post's header (PostCard `badge`).
  */
 export function VerdictStamp({ verdict, animate = false, className }: VerdictStampProps) {
@@ -55,7 +55,7 @@ export function VerdictStamp({ verdict, animate = false, className }: VerdictSta
       role="img"
       aria-label={`Izglasano: ${look.label}`}
       title={look.label}
-      className={cn("relative inline-flex size-12 shrink-0 -rotate-6", animate && "animate-stamp-in", className)}
+      className={cn("relative inline-flex size-12 shrink-0", animate && "animate-stamp-in", className)}
     >
       <svg aria-hidden viewBox="0 0 40 44" className="absolute inset-0 size-full">
         <polygon points={OUTER} className="fill-abyss/85 stroke-gold-300" strokeWidth={2} strokeLinejoin="round" />
