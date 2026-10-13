@@ -14,7 +14,7 @@ export function TopBar({ profile }: { profile: ReactNode }) {
 
   return (
     <header className="flex h-14 items-center justify-between px-4 pt-2">
-      <span className="font-display text-lg font-bold text-gold-300">Nexus</span>
+      <span className="font-display text-lg font-bold text-gold-300">FRICK</span>
       {profile}
     </header>
   );

@@ -15,10 +15,11 @@ const outDir = path.join(
   "icons",
 );
 
-// Letter "N" drawn as a polygon in an 80x100 box, so the output does not depend on installed fonts.
-const N_POINTS = [
-  [0, 100], [0, 0], [20, 0], [60, 62], [60, 0],
-  [80, 0], [80, 100], [60, 100], [20, 38], [20, 100],
+// Letter "F" (FRICK) drawn as a polygon in an 80x100 box, so the output does not depend on installed fonts.
+// Shifted right a little so it looks centered (an F has nothing under its arms).
+const F_POINTS = [
+  [8, 0], [80, 0], [80, 20], [30, 20], [30, 41],
+  [70, 41], [70, 60], [30, 60], [30, 100], [8, 100],
 ];
 
 /** @param {number} letterRatio letter height as a fraction of the icon size */
@@ -27,7 +28,7 @@ function iconSvg(letterRatio) {
   const scale = (size * letterRatio) / 100;
   const offsetX = (size - 80 * scale) / 2;
   const offsetY = (size - 100 * scale) / 2;
-  const points = N_POINTS.map(
+  const points = F_POINTS.map(
     ([x, y]) => `${offsetX + x * scale},${offsetY + y * scale}`,
   ).join(" ");
 

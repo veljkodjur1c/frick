@@ -16,11 +16,11 @@ const cinzel = Cinzel({
 });
 
 export const metadata: Metadata = {
-  title: "Nexus",
+  title: "FRICK",
   description: "Nedeljni taskovi, boss i rangovi za ekipu.",
   appleWebApp: {
     capable: true,
-    title: "Nexus",
+    title: "FRICK",
     statusBarStyle: "black-translucent",
   },
   icons: {
