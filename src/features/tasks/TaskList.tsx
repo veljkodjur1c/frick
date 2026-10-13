@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Card, EmptyState, Skeleton, buttonClasses } from "@/components/ui";
-import { syncWeekPhase } from "@/features/champ-select/weekPhase";
+import { syncWeekPhase } from "@/features/week/weekPhase";
 import { isChampSelectOpen } from "@/lib/game/champSelect";
 import { TaskBoard } from "./TaskBoard";
 import { getCurrentWeekTasks } from "./queries";

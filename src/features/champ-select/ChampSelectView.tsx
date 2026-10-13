@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { Card, Divider, EmptyState, Skeleton, buttonClasses } from "@/components/ui";
+import { syncWeekPhase } from "@/features/week/weekPhase";
 import { formatNumber } from "@/lib/format";
 import { CHAMP_SELECT_OPENS_HOUR, PROPOSAL_APPROVALS_NEEDED } from "@/lib/game/config";
 import { NewProposalSheet } from "./NewProposalSheet";
 import { ProposalCard } from "./ProposalCard";
 import { getChampSelect } from "./queries";
-import { syncWeekPhase } from "./weekPhase";
 
 /** "2026-10-19" -> "19. 10." */
 function shortDate(isoDate: string): string {
