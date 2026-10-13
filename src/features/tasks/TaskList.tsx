@@ -1,12 +1,41 @@
-import { Card, EmptyState, Skeleton } from "@/components/ui";
+import Link from "next/link";
+import { Card, EmptyState, Skeleton, buttonClasses } from "@/components/ui";
 import { syncWeekPhase } from "@/features/champ-select/weekPhase";
+import { isChampSelectOpen } from "@/lib/game/champSelect";
 import { TaskBoard } from "./TaskBoard";
 import { getCurrentWeekTasks } from "./queries";
 
 /** Reads the session, so it must sit inside a <Suspense> boundary. */
 export async function TaskList() {
-  // On Monday this turns champ select's approved proposals into this week's tasks.
+  // On Sunday evening this opens champ select; on Monday it turns the approved proposals into tasks.
   await syncWeekPhase();
+  const content = await currentWeekContent();
+
+  // syncWeekPhase() checked the session, so reading the clock here is allowed.
+  if (!isChampSelectOpen(new Date())) return content;
+  return (
+    <div className="flex flex-col gap-6">
+      <ChampSelectBanner />
+      {content}
+    </div>
+  );
+}
+
+function ChampSelectBanner() {
+  return (
+    <Card className="flex flex-col gap-3">
+      <p className="text-fg">
+        Champ select je otvoren
+        <span className="block text-sm text-fg-muted">Predloži i izglasaj taskove za sledeću nedelju do ponoći.</span>
+      </p>
+      <Link href="/champ-select" className={buttonClasses({ fullWidth: true })}>
+        Idi na champ select
+      </Link>
+    </Card>
+  );
+}
+
+async function currentWeekContent() {
   const week = await getCurrentWeekTasks();
 
   if (week.state === "none" || (week.state === "inactive" && week.status === "finished")) {
