@@ -101,6 +101,7 @@ in the same PR, put it on `/design`, and say so in the PR description.
 - In code: every number lives in `src/lib/game/config.ts` (undecided ones are marked PLACEHOLDER). Week math
   (`weekStartOf`, `weekEndOf`, `nextWeekStart`, `currentWeekStart`, `dayOfWeek`, all Europe/Belgrade) is in
   `src/lib/game/week.ts`. Never compute week boundaries with `getDay()` or UTC dates yourself.
+- Points (`approvedPoints` for a player or the boss damage, `weeklyProgress`) are in `src/lib/game/points.ts`.
 
 ## Auth & data access
 - `src/proxy.ts` refreshes the session on every request and sends logged-out users to `/login`, the only public route.
