@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui";
 import { ProfileAvatarLink } from "@/features/profile/ProfileAvatarLink";
+import { WeekSync } from "@/features/week/WeekSync";
 import { BottomNav } from "./BottomNav";
 import { TopBar } from "./TopBar";
 
@@ -19,6 +20,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         {children}
       </main>
       <BottomNav />
+      {/* Settles finished weeks and starts the new one; reads the session, so behind its own boundary. */}
+      <Suspense fallback={null}>
+        <WeekSync />
+      </Suspense>
     </div>
   );
 }

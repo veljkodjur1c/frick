@@ -20,7 +20,8 @@ UI language: Serbian (Latin script). Code, comments, commit messages, branch nam
 - `src/components/ui/`    design system: the ONLY shared UI building blocks (see "Design system" below)
 - `src/features/<name>/`  feature code (components, hooks, queries) - each person owns their features
   (`auth`: login/sign-up form + actions, `profile`: profile form, avatar upload, `feed`: posts,
-  `tasks`: weekly task list, ticking `check` tasks)
+  `tasks`: weekly task list, ticking `check` tasks, `champ-select`: proposals and votes,
+  `week`: `syncWeekPhase()` moves the weeks along: settlement, activation, boss, champ select)
 - `src/lib/supabase/`     Supabase helpers: `client.ts` (browser), `server.ts` (server), `auth.ts` (current user),
   `proxy.ts` (session refresh), `admin.ts` (service role, server only)
 - `src/lib/cn.ts`, `src/lib/format.ts`  small helpers (class joining, Serbian number format)
@@ -104,11 +105,13 @@ in the same PR, put it on `/design`, and say so in the PR description.
 - Week end (settlement, `settleWeek()` in `src/lib/game/settlement.ts`): proofs still pending are accepted, the boss
   result is decided, every player's LP changes, awards are given, and on a boss kill every player gets the next can
   flavor (`nextCanFlavor()`). Each week's boss comes from `BOSS_ROTATION` in `config.ts` (`bossForWeek()`).
+- No cron: `syncWeekPhase()` (`src/features/week/weekPhase.ts`) runs on every page through `WeekSync` in `AppShell`.
+  It settles weeks that have ended (`finish_week()`), creates the current week if champ select never opened, activates
+  it (`activate_week()`), gives it its boss and opens Sunday's champ select. Each step is idempotent.
 - Champ select details (PLACEHOLDER numbers): opens Sunday 18:00 and closes at Monday 00:00. Each player proposes
   tasks (title, `check`/`proof`, `team`/`solo`, 5-100 points; a solo task is for the player who proposes it) and
   votes Za/Protiv on any proposal, their own too. A proposal with at least 3 Za votes becomes a task next week; the rest
-  are rejected. Logic in `src/lib/game/champSelect.ts`; `syncWeekPhase()` opens champ select and activates the week
-  when a page that shows week data loads, so no cron is needed for it.
+  are rejected. Logic in `src/lib/game/champSelect.ts`.
 - In code: every number lives in `src/lib/game/config.ts` (undecided ones are marked PLACEHOLDER). Week math
   (`weekStartOf`, `weekEndOf`, `nextWeekStart`, `currentWeekStart`, `dayOfWeek`, all Europe/Belgrade) is in
   `src/lib/game/week.ts`. Never compute week boundaries with `getDay()` or UTC dates yourself.
