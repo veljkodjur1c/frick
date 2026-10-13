@@ -77,6 +77,11 @@ export function nextWeekStart(startsOn: string): string {
   return toIsoDate(addDays(parseWeekStart(startsOn), 7));
 }
 
+/** Whole weeks from the week starting `from` to the week starting `to` (both Mondays); negative if `to` is earlier. */
+export function weeksBetween(from: string, to: string): number {
+  return Math.round((parseWeekStart(to).getTime() - parseWeekStart(from).getTime()) / (7 * DAY_MS));
+}
+
 /** Monday of the current Belgrade week. */
 export function currentWeekStart(now: Date = new Date()): string {
   return weekStartOf(now);

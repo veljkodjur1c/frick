@@ -99,7 +99,11 @@ in the same PR, put it on `/design`, and say so in the PR description.
 - Boss dies if total approved points >= boss HP at week end.
 - LP: placeholder numbers until we decide: each completed task +X, fewer than 5 completed tasks in a week -Y,
   boss kill gives everyone a bonus. Keep all numbers in `src/lib/game/config.ts`.
-- Weekly awards: MVP (most points) and "Feeder of the week" (fewest points).
+- Weekly awards: MVP (most points) and "Feeder of the week" (fewest points). Ties share the award; no awards when
+  everyone has the same points.
+- Week end (settlement, `settleWeek()` in `src/lib/game/settlement.ts`): proofs still pending are accepted, the boss
+  result is decided, every player's LP changes, awards are given, and on a boss kill every player gets the next can
+  flavor (`nextCanFlavor()`). Each week's boss comes from `BOSS_ROTATION` in `config.ts` (`bossForWeek()`).
 - Champ select details (PLACEHOLDER numbers): opens Sunday 18:00 and closes at Monday 00:00. Each player proposes
   tasks (title, `check`/`proof`, `team`/`solo`, 5-100 points; a solo task is for the player who proposes it) and
   votes Za/Protiv on any proposal, their own too. A proposal with at least 3 Za votes becomes a task next week; the rest

@@ -45,3 +45,18 @@ export const PROPOSAL_APPROVALS_NEEDED = 3;
 /** PLACEHOLDER: points a proposed task may have. */
 export const PROPOSAL_MIN_POINTS = 5;
 export const PROPOSAL_MAX_POINTS = 100;
+
+/** PLACEHOLDER: HP of every weekly boss. Issue #17 ("later") makes it grow week by week. */
+export const BOSS_HP = 500;
+
+/**
+ * Weekly bosses, in order; the list repeats. `image` is an object in the public boss-images bucket
+ * (null shows the boss without art). The first week of the game, BOSS_ROTATION_START, gets the first one.
+ */
+export const BOSS_ROTATION: ReadonlyArray<{ name: string; image: string | null }> = [
+  { name: "Baron Nashor", image: "baron-nashor.jpg" },
+  { name: "Elder Dragon", image: null },
+  { name: "Rift Herald", image: null },
+  { name: "Atakhan", image: null },
+];
+export const BOSS_ROTATION_START = "2026-10-12";
