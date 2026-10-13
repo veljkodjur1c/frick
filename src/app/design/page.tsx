@@ -149,7 +149,7 @@ export default function DesignPage() {
         <div className="flex items-center gap-6">
           <VerdictStamp verdict="legit" />
           <VerdictStamp verdict="cap" />
-          <span className="text-sm text-fg-muted">VerdictStamp: preko slike kad je post ili dokaz izglasan</span>
+          <span className="text-sm text-fg-muted">VerdictStamp: desno u zaglavlju kad je post ili dokaz izglasan</span>
         </div>
       </Section>
 

@@ -10,7 +10,7 @@ import { PROOF_APPROVALS_NEEDED, PROOF_REJECTIONS_NEEDED } from "@/lib/game/conf
 import type { ProofVote } from "@/lib/game/proofs";
 import { voteOnProof } from "./actions";
 
-// Decided proofs get a stamp on the photo instead of a header badge.
+// Decided proofs get a stamp next to the points instead of a status badge.
 const STAMP = { approved: "legit", rejected: "cap" } as const;
 
 /** A task proof in the feed. The other players vote Legit/Cap here; enough votes approve or reject it. */
@@ -58,16 +58,15 @@ export function ProofFeedCard({ proof }: { proof: FeedProofData }) {
       imageAlt={`Dokaz: ${proof.task.title}`}
       caption={`Dokaz za „${proof.task.title}“`}
       badge={
-        <span className="flex gap-1.5">
+        <span className="flex items-center gap-1.5">
           <Badge tone="gold">+{points}</Badge>
-          {status === "pending" && <Badge tone="pending">Na čekanju</Badge>}
+          {status === "pending" ? (
+            <Badge tone="pending">Na čekanju</Badge>
+          ) : (
+            // Animates only when a vote here decided it, not for proofs that load already decided.
+            <VerdictStamp verdict={STAMP[status]} animate={status !== proof.status} />
+          )}
         </span>
-      }
-      stamp={
-        status !== "pending" && (
-          // Animates only when a vote here decided it, not for proofs that load already decided.
-          <VerdictStamp verdict={STAMP[status]} animate={status !== proof.status} />
-        )
       }
       footer={
         canVote ? (

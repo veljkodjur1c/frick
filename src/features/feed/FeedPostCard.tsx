@@ -10,7 +10,7 @@ import type { FeedPostData } from "./queries";
 import { applyVote, nextVote, postVerdict, type PostVote } from "./votes";
 
 /**
- * A feed post rendered as a PostCard, with Legit/Cap voting, the Legit/Cap stamp on the photo and comments.
+ * A feed post rendered as a PostCard, with Legit/Cap voting, the Legit/Cap stamp in the header and comments.
  * Rendered through FeedItemCard.
  */
 export function FeedPostCard({ post }: { post: FeedPostData }) {
@@ -51,7 +51,7 @@ export function FeedPostCard({ post }: { post: FeedPostData }) {
       createdAt={post.createdAt}
       imageUrl={post.imageUrl}
       caption={post.caption}
-      stamp={verdict && <VerdictStamp key={verdict} verdict={verdict} animate={verdict !== initialVerdict} />}
+      badge={verdict && <VerdictStamp key={verdict} verdict={verdict} animate={verdict !== initialVerdict} />}
       footer={
         <div className="flex flex-col gap-2">
           {post.isOwn ? (
