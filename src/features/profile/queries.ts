@@ -9,9 +9,11 @@ export type MyProfile = {
   id: string;
   display_name: string;
   avatar_url: string | null;
+  /** Total LP; the rank comes from it (rankFromLp). */
+  lp: number;
 };
 
-const PROFILE_COLUMNS = "id, display_name, avatar_url";
+const PROFILE_COLUMNS = "id, display_name, avatar_url, lp";
 
 async function readProfile(userId: string): Promise<MyProfile | null> {
   const supabase = await createClient();

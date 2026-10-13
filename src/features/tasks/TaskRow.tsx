@@ -171,9 +171,9 @@ export function TaskIcon() {
   );
 }
 
-export function CameraIcon() {
+export function CameraIcon({ className = "size-6" }: { className?: string }) {
   return (
-    <svg aria-hidden viewBox="0 0 24 24" className="size-6" fill="none" stroke="currentColor" strokeWidth={1.8}>
+    <svg aria-hidden viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth={1.8}>
       <path d="M4 8h3l2-2.5h6L17 8h3v11H4z" strokeLinejoin="round" />
       <circle cx="12" cy="13" r="3.5" />
     </svg>

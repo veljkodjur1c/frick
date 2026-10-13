@@ -32,7 +32,12 @@ async function ProfileCard() {
 
   return (
     <Card className="flex flex-col gap-3">
-      <ProfileForm userId={user.id} displayName={profile.display_name} avatarUrl={profile.avatar_url} />
+      <ProfileForm
+        userId={user.id}
+        displayName={profile.display_name}
+        avatarUrl={profile.avatar_url}
+        lp={profile.lp}
+      />
       <Divider />
       <SignOutButton />
     </Card>
@@ -50,9 +55,12 @@ function ProfileSkeleton() {
     <Card className="flex flex-col gap-3">
       <div className="flex items-center gap-4">
         <Skeleton className="size-20" rounded="full" />
-        <Skeleton className="h-9 w-32" />
+        <div className="flex flex-col gap-2">
+          <Skeleton className="h-7 w-32" />
+          <Skeleton className="h-8 w-28" />
+        </div>
       </div>
-      <Skeleton className="h-[4.5rem] w-full" />
+      <Skeleton className="h-11 w-full" />
       <Skeleton className="h-11 w-full" />
     </Card>
   );
