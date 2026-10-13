@@ -12,6 +12,11 @@ const dateFormat = new Intl.DateTimeFormat("sr-Latn-RS", {
   timeZone: "Europe/Belgrade",
 });
 
+/** Short date in Belgrade time: "18. okt". */
+export function formatDate(date: Date): string {
+  return dateFormat.format(date);
+}
+
 /** How long ago: "pre 5 minuta", "juče". Older than a week shows the date: "3. okt". */
 export function formatTimeAgo(date: Date, now: Date = new Date()): string {
   const seconds = Math.round((date.getTime() - now.getTime()) / 1000);

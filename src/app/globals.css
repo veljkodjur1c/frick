@@ -63,6 +63,19 @@
   --color-rank-grandmaster: #e0464e;
   --color-rank-challenger: #f4d06f;
 
+  /* Monster cans on the shelf (/shelf). One per flavor in src/lib/game/cans.ts, plus metal and locked. */
+  --color-can-original: #78c043;
+  --color-can-ultra-white: #dfe5ea;
+  --color-can-ultra-blue: #2f7fe0;
+  --color-can-ultra-red: #d8343f;
+  --color-can-mango-loco: #36c6d9;
+  --color-can-ultra-violet: #8e5be8;
+  --color-can-pipeline-punch: #f06ba8;
+  --color-can-ultra-gold: #e8b53a;
+  --color-can-khaotic: #f08a24;
+  --color-can-metal: #b9c0c7; /* lid and bottom rim */
+  --color-can-locked: #4b5866; /* flavor not earned yet */
+
   /* Corner radius: small things are tighter, containers are softer */
   --radius-*: initial;
   --radius-sm: 4px; /* badges, checkboxes */
