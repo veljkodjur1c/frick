@@ -1,15 +1,19 @@
 "use server";
 
+import type { PostgrestError } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
 import type { ActionResult } from "@/features/tasks/actions";
 import type { TaskScope, TaskType, WeekStatus } from "@/features/tasks/queries";
 import type { CompletionStatus } from "@/lib/game/points";
+import { countProofVotes, resolveProof, type ProofVote } from "@/lib/game/proofs";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentUser } from "@/lib/supabase/auth";
 import { createClient } from "@/lib/supabase/server";
 import { PROOF_IMAGES_BUCKET } from "./constants";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const GENERIC_ERROR = "Dokaz nije sačuvan. Pokušaj ponovo.";
+const VOTE_ERROR = "Glas nije sačuvan. Pokušaj ponovo.";
 
 type TaskProofRow = {
   type: TaskType;
@@ -84,4 +88,85 @@ export async function submitProof(taskId: string, imagePath: string): Promise<Ac
 
   revalidatePath("/tasks");
   return { ok: true };
+}
+
+export type ProofVoteResult =
+  | { ok: true; status: CompletionStatus; legit: number; cap: number }
+  | { ok: false; error: string };
+
+/**
+ * Sets the viewer's Legit/Cap vote on someone else's pending proof; null takes it back.
+ * Takes the wanted end state (not a toggle). After the vote the proof is approved or rejected
+ * once a side has enough votes (resolveProof), and the new status and counts are returned.
+ */
+export async function voteOnProof(completionId: string, vote: ProofVote | null): Promise<ProofVoteResult> {
+  const user = await getCurrentUser();
+  if (!user) return { ok: false, error: "Prijavi se ponovo pa pokušaj još jednom." };
+  if (!UUID.test(completionId) || (vote !== null && vote !== "legit" && vote !== "cap")) {
+    return { ok: false, error: VOTE_ERROR };
+  }
+
+  const supabase = await createClient();
+
+  const { data: completion, error: readError } = await supabase
+    .from("completions")
+    .select("user_id, status")
+    .eq("id", completionId)
+    .maybeSingle<{ user_id: string; status: CompletionStatus }>();
+  if (readError || !completion) {
+    if (readError) console.error("voteOnProof: read completion failed", readError);
+    return { ok: false, error: VOTE_ERROR };
+  }
+  if (completion.user_id === user.id) return { ok: false, error: "Za svoj dokaz ne možeš da glasaš." };
+  if (completion.status !== "pending") return { ok: false, error: "Glasanje za ovaj dokaz je završeno." };
+
+  // RLS: own vote, only on someone else's pending proof.
+  const votes = supabase.from("proof_votes");
+  let error: PostgrestError | null;
+  if (vote === null) {
+    ({ error } = await votes.delete().eq("completion_id", completionId).eq("voter_id", user.id));
+  } else {
+    // Not upsert(): it would also try to update completion_id/voter_id, which clients may not change.
+    const updated = await votes.update({ vote }).eq("completion_id", completionId).eq("voter_id", user.id).select("vote");
+    error = updated.error;
+    if (!error && !updated.data?.length) {
+      ({ error } = await votes.insert({ completion_id: completionId, vote }));
+    }
+  }
+  if (error) {
+    console.error("voteOnProof: write vote failed", error);
+    return { ok: false, error: VOTE_ERROR };
+  }
+
+  // Count after writing, so of two votes landing at once at least the later one sees both.
+  const { data: allVotes, error: countError } = await votes
+    .select("vote")
+    .eq("completion_id", completionId)
+    .overrideTypes<Array<{ vote: ProofVote }>, { merge: false }>();
+  if (countError) {
+    console.error("voteOnProof: count votes failed", countError);
+    return { ok: false, error: VOTE_ERROR };
+  }
+  const counts = countProofVotes(allVotes);
+  let status = resolveProof(counts);
+
+  if (status !== "pending") {
+    // Players can't change a completion's status (no update grant), so the server does it with the service role.
+    try {
+      const { error: resolveError } = await createAdminClient()
+        .from("completions")
+        .update({ status, resolved_at: new Date().toISOString() })
+        .eq("id", completionId)
+        .eq("status", "pending");
+      if (resolveError) throw resolveError;
+    } catch (resolveError) {
+      // The vote is saved; the next vote (or the weekly job) resolves it.
+      console.error("voteOnProof: resolve failed", resolveError);
+      status = "pending";
+    }
+    revalidatePath("/tasks");
+    revalidatePath("/boss");
+  }
+
+  return { ok: true, status, ...counts };
 }
