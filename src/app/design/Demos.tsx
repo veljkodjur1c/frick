@@ -9,6 +9,8 @@ import {
   SegmentedControl,
   Sheet,
 } from "@/components/ui";
+import { AnnouncementCard } from "@/features/feed/AnnouncementCard";
+import type { FeedAnnouncementData } from "@/features/feed/announcements";
 import { TaskIcon } from "@/features/tasks/TaskRow";
 import { CATEGORY_INFO, TASK_CATEGORIES, type TaskCategory } from "@/lib/game/titles";
 
@@ -132,4 +134,39 @@ export function SheetDemo() {
       </Sheet>
     </>
   );
+}
+
+const DEMO_PLAYERS = ["Marko Petrović", "Luka", "Nikola Ilić", "Stefan", "Velja"].map((displayName, i) => ({
+  id: `demo-${i}`,
+  displayName,
+  avatarUrl: null,
+}));
+const [MARKO, LUKA, NIKOLA] = DEMO_PLAYERS;
+const DEMO_TIME = "2026-10-12T08:00:00Z";
+
+const ANNOUNCEMENTS: FeedAnnouncementData[] = [
+  {
+    kind: "announcement",
+    id: "first-blood",
+    createdAt: DEMO_TIME,
+    event: { kind: "first-blood", player: MARKO, taskTitle: "Teretana pre posla" },
+  },
+  {
+    kind: "announcement",
+    id: "last-hit",
+    createdAt: DEMO_TIME,
+    event: { kind: "last-hit", player: LUKA, bossName: "Baron Nashor" },
+  },
+  { kind: "announcement", id: "pentakill", createdAt: DEMO_TIME, event: { kind: "pentakill", players: DEMO_PLAYERS } },
+  {
+    kind: "announcement",
+    id: "shutdown",
+    createdAt: DEMO_TIME,
+    event: { kind: "shutdown", player: NIKOLA, overtaken: [MARKO] },
+  },
+];
+
+/** Every announcer event. Sits in <Suspense> on the page: the time ("prekjuče") needs the current clock. */
+export function AnnouncerDemo() {
+  return ANNOUNCEMENTS.map((announcement) => <AnnouncementCard key={announcement.id} announcement={announcement} />);
 }

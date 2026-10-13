@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { Suspense, type ReactNode } from "react";
 import {
   Avatar,
   Badge,
@@ -25,7 +25,7 @@ import { CategoryBadge, TitleBadge } from "@/features/titles/CategoryIcon";
 import { TitleBannerList } from "@/features/titles/TitleBanners";
 import { CAN_FLAVORS } from "@/lib/game/cans";
 import { TASK_CATEGORIES } from "@/lib/game/titles";
-import { BossDemo, CategoryPickerDemo, SheetDemo, TaskListDemo } from "./Demos";
+import { AnnouncerDemo, BossDemo, CategoryPickerDemo, SheetDemo, TaskListDemo } from "./Demos";
 
 export const metadata: Metadata = { title: "Design system · FRICK" };
 
@@ -283,6 +283,13 @@ export default function DesignPage() {
             </div>
           </div>
         </Card>
+      </Section>
+
+      <Section title="Announcer u feedu">
+        {/* The time ("prekjuče") needs the current clock, so it renders per request, not at build time. */}
+        <Suspense fallback={null}>
+          <AnnouncerDemo />
+        </Suspense>
       </Section>
 
       <Section title="Boss i progres">

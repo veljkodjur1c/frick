@@ -19,7 +19,7 @@ UI language: Serbian (Latin script). Code, comments, commit messages, branch nam
 - `src/components/`       app frame (`AppShell`, `BottomNav`, `TopBar`)
 - `src/components/ui/`    design system: the ONLY shared UI building blocks (see "Design system" below)
 - `src/features/<name>/`  feature code (components, hooks, queries) - each person owns their features
-  (`auth`: login/sign-up form + actions, `profile`: profile form, avatar upload, `feed`: posts,
+  (`auth`: login/sign-up form + actions, `profile`: profile form, avatar upload, `feed`: posts, proofs and announcer events in one list,
   `tasks`: weekly task list, ticking `check` tasks, `champ-select`: proposals and votes,
   `week`: `syncWeekPhase()` moves the weeks along: settlement, activation, boss, champ select,
   `titles`: category icons/badges, reading the current title holders, the profile's title banners)

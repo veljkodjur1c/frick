@@ -5,6 +5,7 @@ import { collectors } from "@/lib/game/cans";
 import type { CompletionStatus } from "@/lib/game/points";
 import { mainTitleOf, type CategoryTitle, type TaskCategory } from "@/lib/game/titles";
 import { createClient } from "@/lib/supabase/server";
+import { getAnnouncements, type FeedAnnouncementData } from "./announcements";
 import { FEED_PAGE_SIZE, POST_IMAGES_BUCKET } from "./constants";
 import { mergeNewestFirst } from "./merge";
 import type { PostVote, VoteTally } from "./votes";
@@ -46,7 +47,7 @@ export type FeedProofData = {
   votes: VoteTally;
 };
 
-export type FeedItem = FeedPostData | FeedProofData;
+export type FeedItem = FeedPostData | FeedProofData | FeedAnnouncementData;
 
 export type FeedPage = {
   items: FeedItem[];
@@ -86,7 +87,8 @@ const SIGNED_URL_TTL = 60 * 60;
 const VOTE_QUEUE_LIMIT = 50;
 
 /**
- * One page of the feed, newest first: posts and task proofs, each with author, a signed photo URL and votes.
+ * One page of the feed, newest first: posts and task proofs, each with author, a signed photo URL and votes,
+ * and the announcer events (First Blood, Pentakill, ...) that happened in between.
  * `viewerId` is the logged-in user (the caller must have checked it); `before` is the cursor from the previous page.
  * With `voteQueue` it returns only other players' pending proofs the viewer hasn't voted on yet (no posts, no paging).
  */
@@ -154,7 +156,7 @@ export async function getFeedPage(
     })),
   );
 
-  const { items: merged, hasMore } = mergeNewestFirst<
+  const page = mergeNewestFirst<
     (({ kind: "post" } & PostRow) | ({ kind: "proof" } & ProofRow)) & { createdAt: string }
   >(
     [
@@ -163,12 +165,20 @@ export async function getFeedPage(
     ],
     limit,
   );
-  const nextCursor = hasMore && !voteQueue ? merged[merged.length - 1].created_at : null;
-  const rows = voteQueue ? merged.filter((row) => !row.votes.some((vote) => vote.voter_id === viewerId)) : merged;
+  const rows = voteQueue ? page.items.filter((row) => !row.votes.some((vote) => vote.voter_id === viewerId)) : page.items;
+  // Announcer events go down to the page's oldest post or proof, if there are older ones.
+  const eventsFrom = page.hasMore ? page.items[page.items.length - 1].createdAt : undefined;
 
-  const [postUrls, proofUrls] = await Promise.all([
+  const [postUrls, proofUrls, announcements] = await Promise.all([
     signUrls(POST_IMAGES_BUCKET, rows.flatMap((row) => (row.kind === "post" ? [row.image_path] : []))),
     signUrls(PROOF_IMAGES_BUCKET, rows.flatMap((row) => (row.kind === "proof" ? [row.proof_path] : []))),
+    // The events are a decoration; if they fail to load, the feed still shows.
+    voteQueue
+      ? []
+      : getAnnouncements({ from: eventsFrom, before }).catch((error: unknown): FeedAnnouncementData[] => {
+          console.error("getFeedPage: reading announcer events failed", error);
+          return [];
+        }),
   ]);
 
   const items = rows.map((row): FeedItem => {
@@ -201,7 +211,12 @@ export async function getFeedPage(
         };
   });
 
-  return { items, nextCursor };
+  if (voteQueue) return { items, nextCursor: null };
+
+  // The events can push the page's oldest posts and proofs to the next page.
+  const feed = mergeNewestFirst<FeedItem>([items, announcements], limit);
+  const nextCursor = page.hasMore || feed.hasMore ? feed.items[feed.items.length - 1].createdAt : null;
+  return { items: feed.items, nextCursor };
 
   /** Signed URLs by path, one request per bucket. A failure only hides those photos, the feed still loads. */
   async function signUrls(bucket: string, paths: string[]): Promise<Map<string, string>> {
