@@ -14,6 +14,11 @@ const TABS = [
 export function BottomNav() {
   const pathname = usePathname();
 
+  // Every tab needs a login, so the bar would only lead back here.
+  if (pathname === "/login") {
+    return null;
+  }
+
   return (
     <nav className="fixed inset-x-0 bottom-0 z-10 border-t border-line bg-deep/95 pr-[env(safe-area-inset-right)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] backdrop-blur">
       <ul className="mx-auto grid h-16 max-w-md grid-cols-4">
