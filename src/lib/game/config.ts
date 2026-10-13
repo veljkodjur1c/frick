@@ -24,3 +24,13 @@ export const LP_PENALTY_LOW_ACTIVITY = 20;
 
 /** PLACEHOLDER: LP bonus for every player when the boss dies. */
 export const LP_BOSS_KILL_BONUS = 25;
+
+/** PLACEHOLDER: champ select opens on Sunday at this hour (Belgrade time) and runs until the week starts at midnight. */
+export const CHAMP_SELECT_OPENS_HOUR = 18;
+
+/** PLACEHOLDER: "Za" votes a proposed task needs to become a task next week (a majority of the 5 players). */
+export const PROPOSAL_APPROVALS_NEEDED = 3;
+
+/** PLACEHOLDER: points a proposed task may have. */
+export const PROPOSAL_MIN_POINTS = 5;
+export const PROPOSAL_MAX_POINTS = 100;
