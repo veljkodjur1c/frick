@@ -93,7 +93,8 @@ in the same PR, put it on `/design`, and say so in the PR description.
 - Week runs Monday 00:00 to Sunday 23:59 (Europe/Belgrade).
 - Sunday evening is "champ select": players propose tasks and vote; approved tasks activate at the start of the week.
 - Task types: `check` (just tick it) and `proof` (needs a photo). A proof task is `pending` until 2 of the other
-  4 members vote Legit; majority Cap rejects it. Unvoted proofs are auto-accepted at week end.
+  4 members vote Legit; majority Cap (3 of the other 4) rejects it. Unvoted proofs are auto-accepted at week end.
+  After a Cap the player may send a new photo while the week is active. Others vote on proofs in the feed.
 - Each task has `points` and a `scope` (`team` = everyone has it, `solo` = one person).
 - Boss dies if total approved points >= boss HP at week end.
 - LP: placeholder numbers until we decide: each completed task +X, fewer than 5 completed tasks in a week -Y,

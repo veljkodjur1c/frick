@@ -10,6 +10,9 @@ export const PLAYERS = 5;
 /** Legit votes from the other players needed to approve a proof. */
 export const PROOF_APPROVALS_NEEDED = 2;
 
+/** Cap votes that reject a proof: a majority of the other PLAYERS - 1 players. */
+export const PROOF_REJECTIONS_NEEDED = Math.floor((PLAYERS - 1) / 2) + 1;
+
 /** Completing fewer tasks than this in a week costs LP. */
 export const MIN_TASKS_PER_WEEK = 5;
 
