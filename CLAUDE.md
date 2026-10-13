@@ -76,6 +76,7 @@ in the same PR, put it on `/design`, and say so in the PR description.
 | `Input`, `Textarea` | Form fields with `label`, `hint`, `error` |
 | `SegmentedControl` | Switching views of one list (Svi / Tim / Solo) |
 | `Sheet` | Bottom sheet for anything modal (proof upload, voting, proposing a task) |
+| `VerdictStamp` | Legit/Cap result stamped on a voted post or decided proof photo (`PostCard` `stamp`) |
 | `Divider` | Hairline, or with `label` a gold section break (e.g. between weeks in the feed) |
 | `EmptyState`, `Skeleton`, `Spinner` | Empty lists and loading |
 

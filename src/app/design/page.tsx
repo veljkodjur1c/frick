@@ -15,6 +15,7 @@ import {
   RankBadge,
   Skeleton,
   Textarea,
+  VerdictStamp,
   type RankTier,
 } from "@/components/ui";
 import { MonsterCan } from "@/features/shelf/MonsterCan";
@@ -141,6 +142,14 @@ export default function DesignPage() {
           <Badge tone="pending">Na čekanju</Badge>
           <Badge tone="success">Legit</Badge>
           <Badge tone="danger">Cap</Badge>
+        </div>
+      </Section>
+
+      <Section title="Pečat glasanja">
+        <div className="flex items-center gap-6">
+          <VerdictStamp verdict="legit" />
+          <VerdictStamp verdict="cap" />
+          <span className="text-sm text-fg-muted">VerdictStamp: preko slike kad je post ili dokaz izglasan</span>
         </div>
       </Section>
 

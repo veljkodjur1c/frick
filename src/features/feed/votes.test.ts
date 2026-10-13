@@ -2,9 +2,9 @@ import { describe, expect, it } from "vitest";
 import { applyVote, nextVote, postVerdict } from "./votes";
 
 describe("postVerdict", () => {
-  it("is valid when Legit leads and freak when Cap leads", () => {
-    expect(postVerdict({ legit: 3, cap: 1 })).toBe("valid");
-    expect(postVerdict({ legit: 1, cap: 2 })).toBe("freak");
+  it("is legit when Legit leads and cap when Cap leads", () => {
+    expect(postVerdict({ legit: 3, cap: 1 })).toBe("legit");
+    expect(postVerdict({ legit: 1, cap: 2 })).toBe("cap");
   });
 
   it("has no badge without votes or on a tie", () => {

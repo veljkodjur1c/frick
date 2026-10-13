@@ -9,10 +9,10 @@ export type VoteTally = {
   mine: PostVote | null;
 };
 
-/** More Legit -> "valid", more Cap -> "freak", no votes or a tie -> null (no badge). */
-export function postVerdict({ legit, cap }: Pick<VoteTally, "legit" | "cap">): "valid" | "freak" | null {
-  if (legit > cap) return "valid";
-  if (cap > legit) return "freak";
+/** More Legit -> "legit", more Cap -> "cap", no votes or a tie -> null (no stamp). */
+export function postVerdict({ legit, cap }: Pick<VoteTally, "legit" | "cap">): "legit" | "cap" | null {
+  if (legit > cap) return "legit";
+  if (cap > legit) return "cap";
   return null;
 }
 

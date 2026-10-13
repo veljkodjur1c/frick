@@ -99,6 +99,22 @@
   --shadow-glow-gold: 0 0 0 1px var(--color-gold-300), 0 0 18px -4px rgb(200 170 110 / 0.55);
   --shadow-glow-hextech: 0 0 0 1px var(--color-hextech-300), 0 0 18px -4px rgb(10 200 185 / 0.55);
 
+  /* Motion: a Legit/Cap stamp landing on a photo right after the deciding vote (VerdictStamp). */
+  --animate-stamp-in: stamp-in 450ms ease-out;
+  @keyframes stamp-in {
+    0% {
+      opacity: 0;
+      transform: scale(1.8);
+    }
+    60% {
+      opacity: 1;
+      transform: scale(0.92);
+    }
+    100% {
+      transform: none;
+    }
+  }
+
   /* Motion: a new Monster can popping onto the shelf (crafting). */
   --animate-can-reveal: can-reveal 600ms ease-out;
   @keyframes can-reveal {
