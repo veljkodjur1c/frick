@@ -10,7 +10,7 @@ import { applyVote, nextVote, postVerdict, type PostVote } from "./votes";
 
 /**
  * A feed post rendered as a PostCard, with Legit/Cap voting and the Valid/Freak badge.
- * Used by the server list and the client "Učitaj još" list.
+ * Rendered through FeedItemCard.
  */
 export function FeedPostCard({ post }: { post: FeedPostData }) {
   const [votes, setVotes] = useState(post.votes);

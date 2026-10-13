@@ -5,7 +5,7 @@ import { Button, Sheet, Textarea } from "@/components/ui";
 import { createClient } from "@/lib/supabase/client";
 import { createPost } from "./actions";
 import { CAPTION_MAX_LENGTH, MAX_UPLOAD_BYTES, POST_IMAGES_BUCKET } from "./constants";
-import { resizeImage } from "./resizeImage";
+import { resizeImage } from "@/lib/resizeImage";
 
 /** "Nova objava" button and the sheet for picking a photo and writing a caption. */
 export function NewPostSheet({ userId }: { userId: string }) {
