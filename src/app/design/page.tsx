@@ -176,6 +176,10 @@ export default function DesignPage() {
             <Avatar name="Luka Jovanović" size="lg" highlight="feeder" />
             <span className="text-xs text-fg-muted">Feeder</span>
           </div>
+          <div className="flex flex-col items-center gap-2">
+            <Avatar name="Nikola Ilić" size="lg" highlight="collector" />
+            <span className="text-xs text-fg-muted">Kolekcionar</span>
+          </div>
         </div>
       </Section>
 

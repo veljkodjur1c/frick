@@ -15,6 +15,8 @@ const HIGHLIGHTS = {
   mvp: "shadow-glow-gold",
   // Feeder of the week. Playful, not alarming.
   feeder: "ring-2 ring-danger/70 grayscale-[35%]",
+  // Owns every Monster can flavor ("Kolekcionar"). Kept forever, unlike the weekly ones.
+  collector: "shadow-glow-hextech",
 } as const;
 
 type AvatarProps = {

@@ -1,12 +1,18 @@
 import "server-only";
 import { PROOF_IMAGES_BUCKET } from "@/features/proofs/constants";
+import { collectors } from "@/lib/game/cans";
 import type { CompletionStatus } from "@/lib/game/points";
 import { createClient } from "@/lib/supabase/server";
 import { FEED_PAGE_SIZE, POST_IMAGES_BUCKET } from "./constants";
 import { mergeNewestFirst } from "./merge";
 import type { PostVote, VoteTally } from "./votes";
 
-type Author = { displayName: string; avatarUrl: string | null };
+type Author = {
+  displayName: string;
+  avatarUrl: string | null;
+  /** Owns every Monster can flavor: shown with the "Kolekcionar" avatar frame. */
+  collector: boolean;
+};
 
 export type FeedPostData = {
   kind: "post";
@@ -105,12 +111,27 @@ export async function getFeedPage(viewerId: string, before?: string): Promise<Fe
     proofQuery = proofQuery.lt("created_at", before);
   }
 
-  const [posts, proofs] = await Promise.all([
+  const [posts, proofs, cans] = await Promise.all([
     postQuery.overrideTypes<PostRow[], { merge: false }>(),
     proofQuery.overrideTypes<ProofRow[], { merge: false }>(),
+    // Every can, for the "Kolekcionar" avatar frame (a handful of rows per player).
+    supabase
+      .from("cans")
+      .select("user_id, flavor, earned_at")
+      .order("earned_at")
+      .order("id")
+      .overrideTypes<Array<{ user_id: string; flavor: string; earned_at: string }>, { merge: false }>(),
   ]);
   if (posts.error) throw posts.error;
   if (proofs.error) throw proofs.error;
+  if (cans.error) throw cans.error;
+
+  const { completed } = collectors(
+    [...new Set(cans.data.map((can) => can.user_id))].map((id) => ({
+      id,
+      history: cans.data.filter((can) => can.user_id === id).map((can) => ({ flavor: can.flavor, earnedAt: can.earned_at })),
+    })),
+  );
 
   const { items: rows, hasMore } = mergeNewestFirst<
     (({ kind: "post" } & PostRow) | ({ kind: "proof" } & ProofRow)) & { createdAt: string }
@@ -132,7 +153,11 @@ export async function getFeedPage(viewerId: string, before?: string): Promise<Fe
     const shared = {
       id: row.id,
       createdAt: row.created_at,
-      author: { displayName: row.author.display_name, avatarUrl: row.author.avatar_url },
+      author: {
+        displayName: row.author.display_name,
+        avatarUrl: row.author.avatar_url,
+        collector: completed.has(row.user_id),
+      },
       isOwn: row.user_id === viewerId,
       votes: tally(row.votes, viewerId),
     };
