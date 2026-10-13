@@ -28,3 +28,11 @@ export function formatTimeAgo(date: Date, now: Date = new Date()): string {
   if (abs < 7 * 86400) return relativeFormat.format(Math.round(seconds / 86400), "day");
   return dateFormat.format(date);
 }
+
+const pluralRules = new Intl.PluralRules("sr-Latn");
+const TASK_WORD: Partial<Record<Intl.LDMLPluralRule, string>> = { one: "task", few: "taska" };
+
+/** A number of tasks with the right Serbian form: "1 task", "3 taska", "12 taskova", "21 task". */
+export function formatTaskCount(count: number): string {
+  return `${formatNumber(count)} ${TASK_WORD[pluralRules.select(count)] ?? "taskova"}`;
+}

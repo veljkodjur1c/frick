@@ -4,6 +4,7 @@ import { Card, Divider, PageHeader, Skeleton } from "@/components/ui";
 import { SignOutButton } from "@/features/auth/SignOutButton";
 import { ProfileForm } from "@/features/profile/ProfileForm";
 import { getMyProfile } from "@/features/profile/queries";
+import { TitleBanners, TitleBannersSkeleton } from "@/features/titles/TitleBanners";
 import { requireUser } from "@/lib/supabase/auth";
 
 export default function ProfilePage() {
@@ -11,9 +12,14 @@ export default function ProfilePage() {
     <>
       <PageHeader title="Profil" />
       {/* Reads the session (cookies), so with Cache Components it streams in behind a boundary. */}
-      <Suspense fallback={<ProfileSkeleton />}>
-        <ProfileCard />
-      </Suspense>
+      <div className="flex flex-col gap-6">
+        <Suspense fallback={<ProfileSkeleton />}>
+          <ProfileCard />
+        </Suspense>
+        <Suspense fallback={<TitleBannersSkeleton />}>
+          <MyTitles />
+        </Suspense>
+      </div>
     </>
   );
 }
@@ -31,6 +37,12 @@ async function ProfileCard() {
       <SignOutButton />
     </Card>
   );
+}
+
+async function MyTitles() {
+  await connection();
+  const user = await requireUser();
+  return <TitleBanners userId={user.id} />;
 }
 
 function ProfileSkeleton() {
