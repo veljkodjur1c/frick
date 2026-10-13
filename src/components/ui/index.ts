@@ -7,6 +7,7 @@ export { Card, type CardPadding, type CardVariant } from "./Card";
 export { Checkbox } from "./Checkbox";
 export { Divider } from "./Divider";
 export { EmptyState } from "./EmptyState";
+export { HextechFab } from "./HextechFab";
 export { Input, Textarea } from "./Input";
 export { PageHeader } from "./PageHeader";
 export { ProgressBar, type ProgressTone } from "./ProgressBar";

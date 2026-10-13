@@ -82,12 +82,21 @@ type ProofRow = {
 
 const SIGNED_URL_TTL = 60 * 60;
 
+/** Most proofs the "Čeka tvoj glas" list shows at once. */
+const VOTE_QUEUE_LIMIT = 50;
+
 /**
  * One page of the feed, newest first: posts and task proofs, each with author, a signed photo URL and votes.
  * `viewerId` is the logged-in user (the caller must have checked it); `before` is the cursor from the previous page.
+ * With `voteQueue` it returns only other players' pending proofs the viewer hasn't voted on yet (no posts, no paging).
  */
-export async function getFeedPage(viewerId: string, before?: string): Promise<FeedPage> {
+export async function getFeedPage(
+  viewerId: string,
+  before?: string,
+  { voteQueue = false }: { voteQueue?: boolean } = {},
+): Promise<FeedPage> {
   const supabase = await createClient();
+  const limit = voteQueue ? VOTE_QUEUE_LIMIT : FEED_PAGE_SIZE;
 
   // One extra row per source tells us whether there is another page.
   let postQuery = supabase
@@ -109,14 +118,17 @@ export async function getFeedPage(viewerId: string, before?: string): Promise<Fe
     )
     .not("proof_path", "is", null)
     .order("created_at", { ascending: false })
-    .limit(FEED_PAGE_SIZE + 1);
+    .limit(limit + 1);
+  if (voteQueue) proofQuery = proofQuery.eq("status", "pending").neq("user_id", viewerId);
   if (before) {
     postQuery = postQuery.lt("created_at", before);
     proofQuery = proofQuery.lt("created_at", before);
   }
 
   const [posts, proofs, cans, titles] = await Promise.all([
-    postQuery.overrideTypes<PostRow[], { merge: false }>(),
+    voteQueue
+      ? Promise.resolve({ data: [] as PostRow[], error: null })
+      : postQuery.overrideTypes<PostRow[], { merge: false }>(),
     proofQuery.overrideTypes<ProofRow[], { merge: false }>(),
     // Every can, for the "Kolekcionar" avatar frame (a handful of rows per player).
     supabase
@@ -142,16 +154,17 @@ export async function getFeedPage(viewerId: string, before?: string): Promise<Fe
     })),
   );
 
-  const { items: rows, hasMore } = mergeNewestFirst<
+  const { items: merged, hasMore } = mergeNewestFirst<
     (({ kind: "post" } & PostRow) | ({ kind: "proof" } & ProofRow)) & { createdAt: string }
   >(
     [
       posts.data.map((row) => ({ kind: "post" as const, ...row, createdAt: row.created_at })),
       proofs.data.map((row) => ({ kind: "proof" as const, ...row, createdAt: row.created_at })),
     ],
-    FEED_PAGE_SIZE,
+    limit,
   );
-  const nextCursor = hasMore ? rows[rows.length - 1].created_at : null;
+  const nextCursor = hasMore && !voteQueue ? merged[merged.length - 1].created_at : null;
+  const rows = voteQueue ? merged.filter((row) => !row.votes.some((vote) => vote.voter_id === viewerId)) : merged;
 
   const [postUrls, proofUrls] = await Promise.all([
     signUrls(POST_IMAGES_BUCKET, rows.flatMap((row) => (row.kind === "post" ? [row.image_path] : []))),
@@ -200,6 +213,20 @@ export async function getFeedPage(viewerId: string, before?: string): Promise<Fe
     }
     return new Map(data.flatMap((item) => (item.signedUrl && item.path ? [[item.path, item.signedUrl]] : [])));
   }
+}
+
+/** How many of the other players' pending proofs still wait for the viewer's vote (the badge on the feed button). */
+export async function countVoteQueue(viewerId: string): Promise<number> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("completions")
+    .select("id, votes:proof_votes(voter_id)")
+    .eq("status", "pending")
+    .not("proof_path", "is", null)
+    .neq("user_id", viewerId)
+    .overrideTypes<Array<{ id: string; votes: Array<{ voter_id: string }> }>, { merge: false }>();
+  if (error) throw error;
+  return data.filter((proof) => !proof.votes.some((vote) => vote.voter_id === viewerId)).length;
 }
 
 function tally(votes: VoteRow[], viewerId: string): VoteTally {

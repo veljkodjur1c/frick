@@ -117,6 +117,18 @@
 
   /* Motion: a new Monster can popping onto the shelf (crafting). */
   --animate-can-reveal: can-reveal 600ms ease-out;
+  /* Motion: a Hextech energy ring when the floating action button is pressed. */
+  --animate-hex-pulse: hex-pulse 500ms ease-out forwards;
+  @keyframes hex-pulse {
+    0% {
+      opacity: 0.7;
+      transform: scale(1);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(1.7);
+    }
+  }
   @keyframes can-reveal {
     0% {
       opacity: 0;
