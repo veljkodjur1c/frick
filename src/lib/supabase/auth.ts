@@ -1,4 +1,5 @@
 import "server-only";
+import { redirect } from "next/navigation";
 import { cache } from "react";
 import type { User } from "@supabase/supabase-js";
 import { createClient } from "./server";
@@ -18,3 +19,15 @@ export const getCurrentUser = cache(async (): Promise<User | null> => {
   }
   return data.user;
 });
+
+/**
+ * The logged-in user, or a redirect to /login. Use at the top of protected pages and Server Actions.
+ * Same rules as getCurrentUser(): server code only, and pages must call it inside a <Suspense> boundary.
+ */
+export async function requireUser(): Promise<User> {
+  const user = await getCurrentUser();
+  if (!user) {
+    redirect("/login");
+  }
+  return user;
+}
