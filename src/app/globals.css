@@ -63,6 +63,13 @@
   --color-rank-grandmaster: #e0464e;
   --color-rank-challenger: #f4d06f;
 
+  /* Task categories (src/lib/game/titles.ts): category badges on tasks and proposals. */
+  --color-cat-caffeine: #d08b4c; /* coffee */
+  --color-cat-gym: #5b8cf0;
+  --color-cat-grind: #a77ef0;
+  --color-cat-chef: #ec8fb5;
+  --color-cat-random: #b9d35a;
+
   /* Monster cans on the shelf (/shelf). One per flavor in src/lib/game/cans.ts, plus metal and locked. */
   --color-can-original: #78c043;
   --color-can-ultra-white: #dfe5ea;

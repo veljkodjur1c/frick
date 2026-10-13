@@ -18,6 +18,7 @@ import {
   type RankTier,
 } from "@/components/ui";
 import { MonsterCan } from "@/features/shelf/MonsterCan";
+import { CameraIcon } from "@/features/tasks/TaskRow";
 import { CategoryBadge, TitleBadge } from "@/features/titles/CategoryIcon";
 import { TitleBannerList } from "@/features/titles/TitleBanners";
 import { CAN_FLAVORS } from "@/lib/game/cans";
@@ -35,6 +36,7 @@ const SWATCHES: Array<{ group: string; tokens: string[] }> = [
   { group: "Zlatna", tokens: ["gold-100", "gold-200", "gold-300", "gold-400", "gold-500", "gold-700"] },
   { group: "Hextech", tokens: ["hextech-100", "hextech-300", "hextech-500", "hextech-700", "hextech-900"] },
   { group: "Status", tokens: ["success", "danger", "pending", "boss", "boss-dark", "boss-trail"] },
+  { group: "Kategorije", tokens: ["cat-caffeine", "cat-gym", "cat-grind", "cat-chef", "cat-random"] },
 ];
 
 const TIERS: RankTier[] = [
@@ -63,6 +65,7 @@ export default function DesignPage() {
   return (
     <div className="flex flex-col gap-8 pb-8">
       <PageHeader
+        showTitle
         title="Design system"
         subtitle="Svi zajednički delovi na jednom mestu. Ako nešto ne valja, popravlja se u src/components/ui, ne u feature-u."
       />
@@ -112,6 +115,15 @@ export default function DesignPage() {
           <Button size="lg">Veliko</Button>
           <Button loading>Šaljem</Button>
           <Button disabled>Zaključano</Button>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button variant="secondary" size="icon" aria-label="Pošalji dokaz">
+            <CameraIcon />
+          </Button>
+          <Button variant="danger" size="icon" aria-label="Pošalji novi dokaz">
+            <CameraIcon />
+          </Button>
+          <span className="text-sm text-fg-muted">size=&quot;icon&quot;: pločica 48px, samo ikonica (sa aria-label)</span>
         </div>
         <Button fullWidth size="lg">
           Pošalji dokaz

@@ -47,6 +47,7 @@ The default Tailwind palette, radii and shadows are switched off. `text-zinc-400
 - Gold `gold-100 ... gold-700`, Hextech `hextech-100 ... hextech-900`
 - Status: `success` (Legit, done), `danger` (Cap, errors), `pending` (waiting for votes), `boss`, `boss-trail`
 - Rank tiers: `rank-iron ... rank-challenger` (emblems only, not text)
+- Task categories: `cat-caffeine`, `cat-gym`, `cat-grind`, `cat-chef`, `cat-random` (category badges, `<Badge tone="gym">`)
 - Radius: `rounded-sm` badges/checkboxes, `rounded-md` buttons/inputs, `rounded-lg` cards/images, `rounded-full` avatars
 - Shadows: `shadow-card`, `shadow-sheet`, `shadow-glow-gold`, `shadow-glow-hextech`
 - Spacing: the normal Tailwind scale. Page padding comes from `AppShell`. Between sections `gap-6`, inside a card `gap-3`.
@@ -63,7 +64,7 @@ in the same PR, put it on `/design`, and say so in the PR description.
 ### Components (`import { ... } from "@/components/ui"`)
 | Component | Use for |
 |---|---|
-| `PageHeader` | Top of every tab page (the page's only h1) |
+| `PageHeader` | Top of every page (the page's only h1). On tab pages the title is screen-reader only; `subtitle`/`action` still show. `showTitle` for login and `/design` |
 | `Button`, `buttonClasses()` | All buttons. `primary` = the one main action on a screen, `secondary`, `ghost`, `success` (Legit), `danger` (Cap). `buttonClasses()` styles a `<Link>` as a button |
 | `Card` | `default` for normal content, `inset` inside another card, `framed` (gold cut corners) only for boss/rank/awards/rewards |
 | `Badge` | Points (`gold`), scope (Tim/Solo), proof status (`pending`/`success`/`danger`) |

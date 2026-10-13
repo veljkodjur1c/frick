@@ -67,9 +67,9 @@ export function CategoryIcon({ category, className }: { category: TaskCategory; 
 }
 
 /** Small label with a task's category, on task rows and proposal cards. */
-export function CategoryBadge({ category }: { category: TaskCategory }) {
+export function CategoryBadge({ category, className }: { category: TaskCategory; className?: string }) {
   return (
-    <Badge>
+    <Badge tone={category} className={className}>
       <CategoryIcon category={category} className="size-3.5" />
       {CATEGORY_INFO[category].title}
     </Badge>

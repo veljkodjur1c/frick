@@ -6,16 +6,26 @@ type PageHeaderProps = {
   subtitle?: ReactNode;
   /** Right side, usually one small Button or an Avatar. */
   action?: ReactNode;
+  /**
+   * Tab pages leave it off: the title is only for screen readers, so the content starts right under the top bar.
+   * Pages without the top bar or tabs (login, /design) show it.
+   */
+  showTitle?: boolean;
   className?: string;
 };
 
-/** Top of every tab page. The only place an h1 should come from. */
-export function PageHeader({ title, subtitle, action, className }: PageHeaderProps) {
+/** Top of every page. The only place an h1 should come from. */
+export function PageHeader({ title, subtitle, action, showTitle = false, className }: PageHeaderProps) {
+  const heading = (
+    <h1 className={showTitle ? "font-display text-2xl leading-tight font-bold text-gold-200" : "sr-only"}>{title}</h1>
+  );
+  if (!showTitle && !subtitle && !action) return heading;
+
   return (
-    <header className={cn("mb-5 flex items-start justify-between gap-3", className)}>
+    <header className={cn("flex justify-between gap-3", showTitle ? "mb-5 items-start" : "mb-4 items-center", className)}>
       <div className="min-w-0">
-        <h1 className="font-display text-2xl leading-tight font-bold text-gold-200">{title}</h1>
-        {subtitle && <p className="mt-1 text-sm text-fg-muted">{subtitle}</p>}
+        {heading}
+        {subtitle && <p className={cn("text-sm text-fg-muted", showTitle && "mt-1")}>{subtitle}</p>}
       </div>
       {action && <div className="shrink-0">{action}</div>}
     </header>
