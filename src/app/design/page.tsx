@@ -36,6 +36,7 @@ const SWATCHES: Array<{ group: string; tokens: string[] }> = [
   { group: "Zlatna", tokens: ["gold-100", "gold-200", "gold-300", "gold-400", "gold-500", "gold-700"] },
   { group: "Hextech", tokens: ["hextech-100", "hextech-300", "hextech-500", "hextech-700", "hextech-900"] },
   { group: "Status", tokens: ["success", "danger", "pending", "boss", "boss-dark", "boss-trail"] },
+  { group: "Kategorije", tokens: ["cat-caffeine", "cat-gym", "cat-grind", "cat-chef", "cat-random"] },
 ];
 
 const TIERS: RankTier[] = [

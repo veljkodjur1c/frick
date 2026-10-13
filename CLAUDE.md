@@ -47,6 +47,7 @@ The default Tailwind palette, radii and shadows are switched off. `text-zinc-400
 - Gold `gold-100 ... gold-700`, Hextech `hextech-100 ... hextech-900`
 - Status: `success` (Legit, done), `danger` (Cap, errors), `pending` (waiting for votes), `boss`, `boss-trail`
 - Rank tiers: `rank-iron ... rank-challenger` (emblems only, not text)
+- Task categories: `cat-caffeine`, `cat-gym`, `cat-grind`, `cat-chef`, `cat-random` (category badges, `<Badge tone="gym">`)
 - Radius: `rounded-sm` badges/checkboxes, `rounded-md` buttons/inputs, `rounded-lg` cards/images, `rounded-full` avatars
 - Shadows: `shadow-card`, `shadow-sheet`, `shadow-glow-gold`, `shadow-glow-hextech`
 - Spacing: the normal Tailwind scale. Page padding comes from `AppShell`. Between sections `gap-6`, inside a card `gap-3`.
