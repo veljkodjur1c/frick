@@ -167,8 +167,9 @@ in the same PR, put it on `/design`, and say so in the PR description.
 - `npm run lint`  lint
 - `npm test`      unit tests (game logic)
 - `npx supabase db push`  apply migrations to the linked Supabase project (only migrations that are merged to main)
-- `npm run seed:dev`  dry run of the dev seed (current week, boss, tasks); `npm run seed:dev -- --yes` writes,
-  add `--reset` to recreate the week's tasks. Needs `SUPABASE_SERVICE_ROLE_KEY` in `.env.local`.
+- `npm run seed:dev`  dry run of the dev seed (current week, boss, tasks in every category); `npm run seed:dev -- --yes` writes,
+  add `--reset` to recreate the week's tasks, `--titles-for <name>` to tick enough tasks for that player to hold the
+  Gymbro and Caffeine addict titles (untick in `/tasks` to undo). Needs `SUPABASE_SERVICE_ROLE_KEY` in `.env.local`.
 - `npx next typegen && npx tsc --noEmit`  type check (`tsc` needs the route types from `next typegen` first)
 
 ## Before opening a PR
