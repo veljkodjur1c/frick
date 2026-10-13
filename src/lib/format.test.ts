@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatDate, formatTimeAgo } from "./format";
+import { formatDate, formatTaskCount, formatTimeAgo } from "./format";
 
 describe("formatDate", () => {
   it("shows day and short month in Belgrade time", () => {
@@ -24,5 +24,16 @@ describe("formatTimeAgo", () => {
 
   it("shows the date after a week", () => {
     expect(ago(10 * 86400)).toMatch(/^3\. okt/);
+  });
+});
+
+describe("formatTaskCount", () => {
+  it("uses the Serbian plural forms", () => {
+    expect(formatTaskCount(1)).toBe("1 task");
+    expect(formatTaskCount(3)).toBe("3 taska");
+    expect(formatTaskCount(5)).toBe("5 taskova");
+    expect(formatTaskCount(12)).toBe("12 taskova");
+    expect(formatTaskCount(21)).toBe("21 task");
+    expect(formatTaskCount(24)).toBe("24 taska");
   });
 });

@@ -1,10 +1,15 @@
 import type { ReactNode } from "react";
 import { Avatar, Card } from "@/components/ui";
+import { TitleBadge } from "@/features/titles/CategoryIcon";
 import { formatTimeAgo } from "@/lib/format";
+import type { TaskCategory } from "@/lib/game/titles";
 
 type PostCardProps = {
-  /** collector: owns every Monster can flavor, shown with the "Kolekcionar" avatar frame. */
-  author: { name: string; avatarUrl?: string | null; collector?: boolean };
+  /**
+   * collector: owns every Monster can flavor, shown with the "Kolekcionar" avatar frame.
+   * title: the author's category title, shown as a gold badge next to the name.
+   */
+  author: { name: string; avatarUrl?: string | null; collector?: boolean; title?: TaskCategory | null };
   /** ISO timestamp. */
   createdAt: string;
   /** Signed URL of the photo. Null shows a placeholder (e.g. the file is gone). */
@@ -27,7 +32,10 @@ export function PostCard({ author, createdAt, imageUrl, imageAlt, caption, badge
       <header className="flex items-center gap-3">
         <Avatar name={author.name} src={author.avatarUrl} highlight={author.collector ? "collector" : "none"} />
         <div className="min-w-0 flex-1">
-          <p className="truncate font-semibold text-fg">{author.name}</p>
+          <div className="flex min-w-0 items-center gap-2">
+            <p className="truncate font-semibold text-fg">{author.name}</p>
+            {author.title && <TitleBadge category={author.title} />}
+          </div>
           {/* "pre 5 minuta" can tick over between the server render and hydration; that's fine. */}
           <time dateTime={createdAt} className="text-sm text-fg-muted" suppressHydrationWarning>
             {formatTimeAgo(new Date(createdAt))}

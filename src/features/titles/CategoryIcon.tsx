@@ -75,3 +75,13 @@ export function CategoryBadge({ category }: { category: TaskCategory }) {
     </Badge>
   );
 }
+
+/** A player's title next to their name (feed), in gold so it reads as a reward, not a task label. */
+export function TitleBadge({ category }: { category: TaskCategory }) {
+  return (
+    <Badge tone="gold">
+      <CategoryIcon category={category} className="size-3.5" />
+      {CATEGORY_INFO[category].title}
+    </Badge>
+  );
+}

@@ -18,7 +18,10 @@ import {
   type RankTier,
 } from "@/components/ui";
 import { MonsterCan } from "@/features/shelf/MonsterCan";
+import { CategoryBadge, TitleBadge } from "@/features/titles/CategoryIcon";
+import { TitleBannerList } from "@/features/titles/TitleBanners";
 import { CAN_FLAVORS } from "@/lib/game/cans";
+import { TASK_CATEGORIES } from "@/lib/game/titles";
 import { BossDemo, CategoryPickerDemo, SheetDemo, TaskListDemo } from "./Demos";
 
 export const metadata: Metadata = { title: "Design system · Nexus" };
@@ -158,6 +161,26 @@ export default function DesignPage() {
             <code className="text-xs whitespace-nowrap">can-metal</code>.
           </p>
         </div>
+      </Section>
+
+      <Section title="Kategorije i titule">
+        <div className="flex flex-wrap gap-2">
+          {TASK_CATEGORIES.map((category) => (
+            <CategoryBadge key={category} category={category} />
+          ))}
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {TASK_CATEGORIES.map((category) => (
+            <TitleBadge key={category} category={category} />
+          ))}
+        </div>
+        <TitleBannerList
+          titles={[
+            { category: "caffeine", count: 14, sharedWith: [] },
+            { category: "gym", count: 6, sharedWith: ["Marko"] },
+          ]}
+        />
+        <TitleBannerList titles={[]} />
       </Section>
 
       <Section title="Avatari">

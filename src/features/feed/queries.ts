@@ -1,7 +1,9 @@
 import "server-only";
 import { PROOF_IMAGES_BUCKET } from "@/features/proofs/constants";
+import { getCategoryTitles } from "@/features/titles/queries";
 import { collectors } from "@/lib/game/cans";
 import type { CompletionStatus } from "@/lib/game/points";
+import { mainTitleOf, type CategoryTitle, type TaskCategory } from "@/lib/game/titles";
 import { createClient } from "@/lib/supabase/server";
 import { FEED_PAGE_SIZE, POST_IMAGES_BUCKET } from "./constants";
 import { mergeNewestFirst } from "./merge";
@@ -12,6 +14,8 @@ type Author = {
   avatarUrl: string | null;
   /** Owns every Monster can flavor: shown with the "Kolekcionar" avatar frame. */
   collector: boolean;
+  /** The author's strongest category title (shown next to the name), or null if they hold none. */
+  title: TaskCategory | null;
 };
 
 export type FeedPostData = {
@@ -111,7 +115,7 @@ export async function getFeedPage(viewerId: string, before?: string): Promise<Fe
     proofQuery = proofQuery.lt("created_at", before);
   }
 
-  const [posts, proofs, cans] = await Promise.all([
+  const [posts, proofs, cans, titles] = await Promise.all([
     postQuery.overrideTypes<PostRow[], { merge: false }>(),
     proofQuery.overrideTypes<ProofRow[], { merge: false }>(),
     // Every can, for the "Kolekcionar" avatar frame (a handful of rows per player).
@@ -121,6 +125,11 @@ export async function getFeedPage(viewerId: string, before?: string): Promise<Fe
       .order("earned_at")
       .order("id")
       .overrideTypes<Array<{ user_id: string; flavor: string; earned_at: string }>, { merge: false }>(),
+    // The titles are a decoration; if they fail to load, the feed still shows.
+    getCategoryTitles().catch((error: unknown): CategoryTitle[] => {
+      console.error("getFeedPage: reading titles failed", error);
+      return [];
+    }),
   ]);
   if (posts.error) throw posts.error;
   if (proofs.error) throw proofs.error;
@@ -157,6 +166,7 @@ export async function getFeedPage(viewerId: string, before?: string): Promise<Fe
         displayName: row.author.display_name,
         avatarUrl: row.author.avatar_url,
         collector: completed.has(row.user_id),
+        title: mainTitleOf(row.user_id, titles),
       },
       isOwn: row.user_id === viewerId,
       votes: tally(row.votes, viewerId),
