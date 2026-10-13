@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { formatTimeAgo } from "./format";
+import { formatDate, formatTimeAgo } from "./format";
+
+describe("formatDate", () => {
+  it("shows day and short month in Belgrade time", () => {
+    // 22:30 UTC on Sunday is already Monday in Belgrade.
+    expect(formatDate(new Date("2026-10-18T22:30:00Z"))).toMatch(/^19\. okt/);
+  });
+});
 
 describe("formatTimeAgo", () => {
   const now = new Date("2026-10-13T12:00:00Z");

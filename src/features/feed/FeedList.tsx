@@ -1,6 +1,6 @@
 import { Card, EmptyState, Skeleton } from "@/components/ui";
 import { requireUser } from "@/lib/supabase/auth";
-import { FeedPostCard } from "./FeedPostCard";
+import { FeedItemCard } from "./FeedItemCard";
 import { LoadMorePosts } from "./LoadMorePosts";
 import { getFeedPage } from "./queries";
 
@@ -8,9 +8,9 @@ import { getFeedPage } from "./queries";
 export async function FeedList() {
   const user = await requireUser();
 
-  const { posts, nextCursor } = await getFeedPage(user.id);
+  const { items, nextCursor } = await getFeedPage(user.id);
 
-  if (posts.length === 0) {
+  if (items.length === 0) {
     return (
       <EmptyState
         title="Još nema objava"
@@ -22,9 +22,9 @@ export async function FeedList() {
   return (
     <div className="flex flex-col gap-4">
       <ul className="flex flex-col gap-4">
-        {posts.map((post) => (
-          <li key={post.id}>
-            <FeedPostCard post={post} />
+        {items.map((item) => (
+          <li key={`${item.kind}-${item.id}`}>
+            <FeedItemCard item={item} />
           </li>
         ))}
       </ul>
