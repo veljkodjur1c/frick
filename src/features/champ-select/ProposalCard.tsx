@@ -4,6 +4,7 @@ import { useOptimistic, useState, useTransition } from "react";
 import { Avatar, Badge, Button, Card } from "@/components/ui";
 import { formatNumber } from "@/lib/format";
 import { isProposalApproved } from "@/lib/game/champSelect";
+import { CategoryBadge } from "@/features/titles/CategoryIcon";
 import { PROPOSAL_APPROVALS_NEEDED } from "@/lib/game/config";
 import { deleteProposal, setProposalVote } from "./actions";
 import type { ProposalData, ProposalVotes } from "./queries";
@@ -69,6 +70,7 @@ export function ProposalCard({ proposal }: { proposal: ProposalData }) {
             {proposal.scope === "team" ? "Tim" : "Solo"}
           </Badge>
           <Badge>{proposal.type === "proof" ? "Sa slikom" : "Štikliranje"}</Badge>
+          {proposal.category && <CategoryBadge category={proposal.category} />}
           {passes && <Badge tone="success">Prolazi</Badge>}
         </div>
       </div>

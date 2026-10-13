@@ -19,7 +19,7 @@ import {
 } from "@/components/ui";
 import { MonsterCan } from "@/features/shelf/MonsterCan";
 import { CAN_FLAVORS } from "@/lib/game/cans";
-import { BossDemo, SheetDemo, TaskListDemo } from "./Demos";
+import { BossDemo, CategoryPickerDemo, SheetDemo, TaskListDemo } from "./Demos";
 
 export const metadata: Metadata = { title: "Design system · Nexus" };
 
@@ -231,6 +231,7 @@ export default function DesignPage() {
         <Input label="Nadimak" placeholder="npr. Faker iz kraja" hint="Vide ga svi u feedu." />
         <Input label="Poeni" type="number" defaultValue={0} error="Task mora da nosi bar 1 poen." />
         <Textarea label="Opis taska" placeholder="Šta tačno treba da se uradi?" />
+        <CategoryPickerDemo />
         <Card>
           <TaskListDemo />
         </Card>

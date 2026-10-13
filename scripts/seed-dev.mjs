@@ -16,16 +16,17 @@ const BOSS = { name: "Baron Nashor", hp: 500 };
 // Object in the public boss-images bucket (migration 20261013114549_boss_images.sql), uploaded once by hand.
 const BOSS_IMAGE = "baron-nashor.jpg";
 
-/** @type {{ title: string, type: "check" | "proof", scope: "team" | "solo", points: number }[]} */
+/** @type {{ title: string, type: "check" | "proof", scope: "team" | "solo", points: number, category: "caffeine" | "gym" | "grind" | "chef" | "random" }[]} */
 const TASKS = [
-  { title: "Prošetaj 10.000 koraka u jednom danu", type: "check", scope: "team", points: 20 },
-  { title: "Pročitaj 30 strana knjige", type: "check", scope: "team", points: 15 },
-  { title: "Skuvaj ručak od nule", type: "proof", scope: "team", points: 30 },
-  { title: "Odradi trening u teretani", type: "proof", scope: "team", points: 25 },
-  { title: "Javi se baki ili deki", type: "check", scope: "solo", points: 10 },
-  { title: "Završi domaći do srede", type: "check", scope: "solo", points: 20 },
-  { title: "Sredi sobu", type: "proof", scope: "solo", points: 35 },
-  { title: "Istrči 5 km", type: "proof", scope: "solo", points: 50 },
+  { title: "Prošetaj 10.000 koraka u jednom danu", type: "check", scope: "team", points: 20, category: "gym" },
+  { title: "Pročitaj 30 strana knjige", type: "check", scope: "team", points: 15, category: "grind" },
+  { title: "Skuvaj ručak od nule", type: "proof", scope: "team", points: 30, category: "chef" },
+  { title: "Odradi trening u teretani", type: "proof", scope: "team", points: 25, category: "gym" },
+  { title: "Popij Monster pre treninga", type: "proof", scope: "team", points: 10, category: "caffeine" },
+  { title: "Javi se baki ili deki", type: "check", scope: "solo", points: 10, category: "random" },
+  { title: "Završi domaći do srede", type: "check", scope: "solo", points: 20, category: "grind" },
+  { title: "Sredi sobu", type: "proof", scope: "solo", points: 35, category: "random" },
+  { title: "Istrči 5 km", type: "proof", scope: "solo", points: 50, category: "gym" },
 ];
 
 // Duplicated from weekStartOf() in src/lib/game/week.ts; keep the two in sync.

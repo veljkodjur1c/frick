@@ -9,6 +9,7 @@ import {
   SegmentedControl,
   Sheet,
 } from "@/components/ui";
+import { CATEGORY_INFO, TASK_CATEGORIES, type TaskCategory } from "@/lib/game/titles";
 
 // Interactive bits of the /design page. Not for use in features.
 
@@ -71,6 +72,22 @@ export function TaskListDemo() {
         ))}
       </ul>
     </div>
+  );
+}
+
+/** SegmentedControl with `columns`: one choice out of more options, wrapping into rows. */
+export function CategoryPickerDemo() {
+  const [category, setCategory] = useState<TaskCategory>("caffeine");
+
+  return (
+    <SegmentedControl
+      label="Kategorija"
+      fullWidth
+      columns={2}
+      value={category}
+      onChange={setCategory}
+      options={TASK_CATEGORIES.map((value) => ({ value, label: CATEGORY_INFO[value].title }))}
+    />
   );
 }
 

@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import type { TaskScope, TaskType } from "@/features/tasks/queries";
 import { PROPOSAL_MAX_POINTS, PROPOSAL_MIN_POINTS } from "@/lib/game/config";
 import { champSelectWeekStart, isValidProposalPoints } from "@/lib/game/champSelect";
+import { isTaskCategory, type TaskCategory } from "@/lib/game/titles";
 import { getCurrentUser } from "@/lib/supabase/auth";
 import { createClient } from "@/lib/supabase/server";
 import { PROPOSAL_DESCRIPTION_MAX_LENGTH, PROPOSAL_TITLE_MAX_LENGTH } from "./constants";
@@ -22,6 +23,7 @@ export type NewProposal = {
   type: TaskType;
   scope: TaskScope;
   points: number;
+  category: TaskCategory;
 };
 
 /**
@@ -44,6 +46,7 @@ export async function createProposal(input: NewProposal): Promise<ActionResult> 
   if ((input.type !== "check" && input.type !== "proof") || (input.scope !== "team" && input.scope !== "solo")) {
     return { ok: false, error: "Predlog nije sačuvan. Pokušaj ponovo." };
   }
+  if (!isTaskCategory(input.category)) return { ok: false, error: "Izaberi kategoriju." };
   if (!isValidProposalPoints(input.points)) {
     return { ok: false, error: `Poeni moraju biti ceo broj od ${PROPOSAL_MIN_POINTS} do ${PROPOSAL_MAX_POINTS}.` };
   }
@@ -70,6 +73,7 @@ export async function createProposal(input: NewProposal): Promise<ActionResult> 
       scope: input.scope,
       assignee_id: input.scope === "solo" ? user.id : null,
       points: input.points,
+      category: input.category,
     })
     .select("id")
     .single<{ id: string }>();
