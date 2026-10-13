@@ -17,6 +17,8 @@ import {
   Textarea,
   type RankTier,
 } from "@/components/ui";
+import { MonsterCan } from "@/features/shelf/MonsterCan";
+import { CAN_FLAVORS } from "@/lib/game/cans";
 import { BossDemo, SheetDemo, TaskListDemo } from "./Demos";
 
 export const metadata: Metadata = { title: "Design system · Nexus" };
@@ -138,6 +140,24 @@ export default function DesignPage() {
           <RankBadge tier="challenger" lp={1312} size="lg" />
         </div>
         <RankBadge tier="emerald" division={4} lp={12} />
+      </Section>
+
+      <Section title="Limenke">
+        <div className="grid grid-cols-3 gap-y-4">
+          {CAN_FLAVORS.map((flavor) => (
+            <div key={flavor.id} className="flex flex-col items-center gap-1">
+              <MonsterCan color={flavor.color} className="h-16" />
+              <code className="text-xs text-fg-muted">{flavor.color}</code>
+            </div>
+          ))}
+        </div>
+        <div className="flex items-end gap-3">
+          <MonsterCan color="can-original" locked className="h-16" />
+          <p className="text-sm text-fg-muted">
+            Zaključana: <code className="text-xs whitespace-nowrap">can-locked</code>. Poklopac i dno:{" "}
+            <code className="text-xs whitespace-nowrap">can-metal</code>.
+          </p>
+        </div>
       </Section>
 
       <Section title="Avatari">

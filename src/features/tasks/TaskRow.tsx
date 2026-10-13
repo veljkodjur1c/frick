@@ -2,6 +2,7 @@
 
 import { useState, useTransition, type ReactNode } from "react";
 import { Badge, Checkbox } from "@/components/ui";
+import { ProofUploadSheet } from "@/features/proofs/ProofUploadSheet";
 import { formatNumber } from "@/lib/format";
 import type { CompletionStatus } from "@/lib/game/points";
 import { setCheckTaskDone } from "./actions";
@@ -28,8 +29,15 @@ export function TaskRow({ task, onOptimisticDone }: TaskRowProps) {
           <TaskMeta task={task}>
             <ProofStatus status={task.myStatus} />
           </TaskMeta>
+          {(task.myStatus === null || task.myStatus === "rejected") && (
+            <ProofUploadSheet
+              taskId={task.id}
+              taskTitle={task.title}
+              points={task.points}
+              retry={task.myStatus === "rejected"}
+            />
+          )}
         </div>
-        {/* Issue #9 adds the "Pošalji dokaz" action here. */}
         {points}
       </div>
     );

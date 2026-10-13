@@ -3,15 +3,15 @@
 import { useState, useTransition } from "react";
 import { Button } from "@/components/ui";
 import { loadMorePosts } from "./actions";
-import { FeedPostCard } from "./FeedPostCard";
-import type { FeedPostData } from "./queries";
+import { FeedItemCard } from "./FeedItemCard";
+import type { FeedItem } from "./queries";
 
 /**
- * Older posts loaded with "Učitaj još", appended under the server-rendered first page.
+ * Older posts and proofs loaded with "Učitaj još", appended under the server-rendered first page.
  * Give it `key={initialCursor}` so it starts over when the first page changes (e.g. after a new post).
  */
 export function LoadMorePosts({ initialCursor }: { initialCursor: string }) {
-  const [posts, setPosts] = useState<FeedPostData[]>([]);
+  const [items, setItems] = useState<FeedItem[]>([]);
   const [cursor, setCursor] = useState<string | null>(initialCursor);
   const [error, setError] = useState(false);
   const [pending, startTransition] = useTransition();
@@ -22,7 +22,7 @@ export function LoadMorePosts({ initialCursor }: { initialCursor: string }) {
     startTransition(async () => {
       try {
         const page = await loadMorePosts(cursor);
-        setPosts((current) => [...current, ...page.posts]);
+        setItems((current) => [...current, ...page.items]);
         setCursor(page.nextCursor);
       } catch {
         setError(true);
@@ -32,11 +32,11 @@ export function LoadMorePosts({ initialCursor }: { initialCursor: string }) {
 
   return (
     <>
-      {posts.length > 0 && (
+      {items.length > 0 && (
         <ul className="flex flex-col gap-4">
-          {posts.map((post) => (
-            <li key={post.id}>
-              <FeedPostCard post={post} />
+          {items.map((item) => (
+            <li key={`${item.kind}-${item.id}`}>
+              <FeedItemCard item={item} />
             </li>
           ))}
         </ul>
