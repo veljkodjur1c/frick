@@ -10,9 +10,12 @@ const tasks: SettlementInput["tasks"] = [
 ];
 
 const players: SettlementInput["players"] = [
-  { id: "ana", lp: 95, earnedFlavors: [] },
-  { id: "marko", lp: 10, earnedFlavors: ["original"] },
+  { id: "ana", lp: 95, canHistory: [] },
+  { id: "marko", lp: 10, canHistory: ["original"] },
 ];
+
+/** Always the first weighted flavor ("original"), so can rolls are predictable. */
+const firstFlavor = () => 0;
 
 describe("settleWeek", () => {
   it("adds up points per player and the boss damage", () => {
@@ -86,18 +89,33 @@ describe("settleWeek", () => {
         { taskId: "solo-ana", userId: "ana", status: "approved" },
         { taskId: "t2", userId: "marko", status: "approved" },
       ],
+      random: firstFlavor,
     });
 
     expect(result.damage).toBe(230);
     expect(result.bossDefeated).toBe(true);
     expect(result.players[0].lp.bossBonus).toBe(25);
-    // Ana has no cans yet, Marko already has "original".
+    // Everyone gets a random can (duplicates allowed); Ana is MVP (180 points) and gets a second one.
     expect(result.cans).toEqual([
-      { userId: "ana", flavor: "original" },
-      { userId: "marko", flavor: "ultra-white" },
+      { userId: "ana", flavor: "original", source: "boss" },
+      { userId: "ana", flavor: "original", source: "mvp" },
+      { userId: "marko", flavor: "original", source: "boss" },
     ]);
     // Ana: 2 tasks (+20) - 20 + 25 = +25, 95 -> 120: Iron IV -> Iron III.
     expect([result.players[0].lpAfter, result.players[0].rankChange]).toEqual([120, "promoted"]);
+  });
+
+  it("protects against bad luck when rolling boss cans", () => {
+    const result = settleWeek({
+      bossHp: 100,
+      players: [{ id: "jova", lp: 0, canHistory: ["original", "original", "original", "original"] }],
+      tasks,
+      completions: [{ taskId: "t1", userId: "jova", status: "approved" }],
+      random: firstFlavor,
+    });
+
+    // 3 duplicates in a row: the next can is a flavor Jova doesn't have.
+    expect(result.cans).toEqual([{ userId: "jova", flavor: "ultra-white", source: "boss" }]);
   });
 
   it("gives MVP and Feeder awards", () => {

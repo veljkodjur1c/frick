@@ -26,7 +26,13 @@ export async function finishWeek(admin: AdminClient, weekId: string): Promise<bo
       .eq("task.week_id", weekId)
       .overrideTypes<CompletionRow[], { merge: false }>(),
     admin.from("profiles").select("id, lp").overrideTypes<Array<{ id: string; lp: number }>, { merge: false }>(),
-    admin.from("cans").select("user_id, flavor").overrideTypes<Array<{ user_id: string; flavor: string }>, { merge: false }>(),
+    // Oldest first, spent ones too: bad-luck protection looks at the order of every can a player got.
+    admin
+      .from("cans")
+      .select("user_id, flavor")
+      .order("earned_at")
+      .order("id")
+      .overrideTypes<Array<{ user_id: string; flavor: string }>, { merge: false }>(),
   ]);
   for (const result of [boss, tasks, completions, profiles, cans]) {
     if (result.error) throw result.error;
@@ -38,7 +44,7 @@ export async function finishWeek(admin: AdminClient, weekId: string): Promise<bo
     players: profiles.data!.map((profile) => ({
       id: profile.id,
       lp: profile.lp,
-      earnedFlavors: cans.data!.filter((can) => can.user_id === profile.id).map((can) => can.flavor),
+      canHistory: cans.data!.filter((can) => can.user_id === profile.id).map((can) => can.flavor),
     })),
     tasks: tasks.data!.map((task) => ({ id: task.id, points: task.points, assigneeId: task.assignee_id })),
     completions: completions.data!.map((c) => ({ taskId: c.task_id, userId: c.user_id, status: c.status })),
@@ -50,7 +56,7 @@ export async function finishWeek(admin: AdminClient, weekId: string): Promise<bo
       boss_defeated: result.bossDefeated,
       players: result.players.map((player) => ({ id: player.id, lp_delta: player.lpAfter - player.lpBefore })),
       awards: result.awards.map((award) => ({ kind: award.kind, user_id: award.userId, points: award.points })),
-      cans: result.cans.map((can) => ({ user_id: can.userId, flavor: can.flavor })),
+      cans: result.cans.map((can) => ({ user_id: can.userId, flavor: can.flavor, source: can.source })),
     },
   });
   if (error) throw error;

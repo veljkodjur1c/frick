@@ -50,7 +50,7 @@ export function ProofFeedCard({ proof }: { proof: FeedProofData }) {
 
   return (
     <PostCard
-      author={{ name: proof.author.displayName, avatarUrl: proof.author.avatarUrl }}
+      author={{ name: proof.author.displayName, avatarUrl: proof.author.avatarUrl, collector: proof.author.collector }}
       createdAt={proof.createdAt}
       imageUrl={proof.imageUrl}
       imageAlt={`Dokaz: ${proof.task.title}`}

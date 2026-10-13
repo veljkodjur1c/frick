@@ -40,7 +40,7 @@ export function FeedPostCard({ post }: { post: FeedPostData }) {
 
   return (
     <PostCard
-      author={{ name: post.author.displayName, avatarUrl: post.author.avatarUrl }}
+      author={{ name: post.author.displayName, avatarUrl: post.author.avatarUrl, collector: post.author.collector }}
       createdAt={post.createdAt}
       imageUrl={post.imageUrl}
       caption={post.caption}

@@ -88,6 +88,22 @@
   --shadow-sheet: 0 -16px 40px -12px rgb(0 0 0 / 0.8);
   --shadow-glow-gold: 0 0 0 1px var(--color-gold-300), 0 0 18px -4px rgb(200 170 110 / 0.55);
   --shadow-glow-hextech: 0 0 0 1px var(--color-hextech-300), 0 0 18px -4px rgb(10 200 185 / 0.55);
+
+  /* Motion: a new Monster can popping onto the shelf (crafting). */
+  --animate-can-reveal: can-reveal 600ms ease-out;
+  @keyframes can-reveal {
+    0% {
+      opacity: 0;
+      transform: translateY(12px) scale(0.6) rotate(-8deg);
+    }
+    70% {
+      opacity: 1;
+      transform: translateY(-4px) scale(1.08) rotate(2deg);
+    }
+    100% {
+      transform: none;
+    }
+  }
 }
 
 /* Fonts come from next/font in layout.tsx, which sets --font-inter and --font-cinzel on <html>. */

@@ -3,7 +3,8 @@ import { Avatar, Card } from "@/components/ui";
 import { formatTimeAgo } from "@/lib/format";
 
 type PostCardProps = {
-  author: { name: string; avatarUrl?: string | null };
+  /** collector: owns every Monster can flavor, shown with the "Kolekcionar" avatar frame. */
+  author: { name: string; avatarUrl?: string | null; collector?: boolean };
   /** ISO timestamp. */
   createdAt: string;
   /** Signed URL of the photo. Null shows a placeholder (e.g. the file is gone). */
@@ -24,7 +25,7 @@ export function PostCard({ author, createdAt, imageUrl, imageAlt, caption, badge
   return (
     <Card as="article" padding="sm" className="flex flex-col gap-3">
       <header className="flex items-center gap-3">
-        <Avatar name={author.name} src={author.avatarUrl} />
+        <Avatar name={author.name} src={author.avatarUrl} highlight={author.collector ? "collector" : "none"} />
         <div className="min-w-0 flex-1">
           <p className="truncate font-semibold text-fg">{author.name}</p>
           {/* "pre 5 minuta" can tick over between the server render and hydration; that's fine. */}

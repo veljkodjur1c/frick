@@ -2,12 +2,28 @@ import Link from "next/link";
 import { Avatar, Badge, buttonClasses, Card, Divider, EmptyState, Skeleton } from "@/components/ui";
 import { cn } from "@/lib/cn";
 import { formatDate, formatNumber } from "@/lib/format";
-import { buildShelf, CAN_FLAVORS, countCollected, nextCanFlavor, type ShelfSlot } from "@/lib/game/cans";
+import {
+  buildShelf,
+  CAN_FLAVORS,
+  collectors,
+  countCollected,
+  missingFlavors,
+  spareCans,
+  type CanRarity,
+  type ShelfSlot,
+} from "@/lib/game/cans";
+import { CAN_RARITY_CHANCE } from "@/lib/game/config";
 import { requireUser } from "@/lib/supabase/auth";
+import { CraftSheet } from "./CraftSheet";
 import { MonsterCan } from "./MonsterCan";
 import { getShelves, type EarnedCan, type ShelfPlayer } from "./queries";
+import { RARITY_LABEL, RARITY_TEXT } from "./rarity";
 
 const TOTAL = formatNumber(CAN_FLAVORS.length);
+
+const ODDS = (Object.keys(CAN_RARITY_CHANCE) as CanRarity[])
+  .map((rarity) => `${RARITY_LABEL[rarity].toLowerCase()} ${formatNumber(CAN_RARITY_CHANCE[rarity] * 100)}%`)
+  .join(" · ");
 
 /** Reads the session, so it sits inside <Suspense>. */
 export async function ShelfView() {
@@ -18,8 +34,9 @@ export async function ShelfView() {
 /** The viewer's cans on a shelf, then everyone's progress. */
 function Shelves({ players, viewerId }: { players: ShelfPlayer[]; viewerId: string }) {
   const myCans = players.find((player) => player.id === viewerId)?.cans ?? [];
-  const next = nextCanFlavor(myCans.map((can) => can.flavor));
-  const teamHasCans = players.some((player) => player.cans.length > 0);
+  const complete = missingFlavors(myCans.map((can) => can.flavor)).length === 0;
+  const { first, completed } = collectors(players);
+  const teamHasCans = players.some((player) => player.history.length > 0);
   const ranked = players
     .map((player) => ({ ...player, collected: countCollected(player.cans) }))
     .sort(
@@ -39,11 +56,18 @@ function Shelves({ players, viewerId }: { players: ShelfPlayer[]; viewerId: stri
               {formatNumber(countCollected(myCans))} od {TOTAL}
             </Badge>
           </div>
+          {complete && (
+            <p className="text-sm text-gold-300">
+              Skupio si sve ukuse!{first.has(viewerId) && " Ti si Kolekcionar."}
+            </p>
+          )}
           <ul aria-label="Tvoje limenke" className="grid grid-cols-3 gap-y-5">
             {buildShelf(myCans).map((slot) => (
-              <CanSlot key={slot.flavor.id} slot={slot} isNext={slot.flavor.id === next.id} />
+              <CanSlot key={slot.flavor.id} slot={slot} />
             ))}
           </ul>
+          <p className="text-xs text-fg-muted">Šanse po limenci: {ODDS}</p>
+          {!complete && <CraftSheet spareCount={spareCans(myCans).length} />}
         </div>
       </Card>
 
@@ -54,11 +78,19 @@ function Shelves({ players, viewerId }: { players: ShelfPlayer[]; viewerId: stri
             <ul className="flex flex-col divide-y divide-line">
               {ranked.map((player) => (
                 <li key={player.id} className="flex items-center gap-3 py-2">
-                  <Avatar name={player.displayName} src={player.avatarUrl} size="sm" />
+                  <Avatar
+                    name={player.displayName}
+                    src={player.avatarUrl}
+                    size="sm"
+                    highlight={completed.has(player.id) ? "collector" : "none"}
+                  />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-fg">
-                      {player.displayName}
-                      {player.id === viewerId &&<span className="text-fg-muted"> · ti</span>}
+                    <p className="flex items-center gap-1.5 text-fg">
+                      <span className="truncate">
+                        {player.displayName}
+                        {player.id === viewerId && <span className="text-fg-muted"> · ti</span>}
+                      </span>
+                      {first.has(player.id) && <Badge tone="hextech">Kolekcionar</Badge>}
                     </p>
                     <div aria-hidden className="mt-1 flex gap-1">
                       {buildShelf(player.cans).map((slot) => (
@@ -76,7 +108,7 @@ function Shelves({ players, viewerId }: { players: ShelfPlayer[]; viewerId: stri
         ) : (
           <EmptyState
             title="Polica je još prazna"
-            description="Oborite bossa zajedno do nedelje uveče i svako dobija prvu limenku."
+            description="Oborite bossa zajedno do nedelje uveče i svako dobija nasumičnu limenku, a MVP još jednu."
             action={
               <Link href="/boss" className={buttonClasses({ variant: "secondary" })}>
                 Pogledaj bossa
@@ -89,9 +121,17 @@ function Shelves({ players, viewerId }: { players: ShelfPlayer[]; viewerId: stri
   );
 }
 
-/** One flavor on the shelf: the can standing on a gold shelf board, with its name below. */
-function CanSlot({ slot, isNext }: { slot: ShelfSlot<EarnedCan>; isNext: boolean }) {
+/** Where a can came from, under its name. */
+function origin(can: EarnedCan): string | null {
+  if (can.source === "craft") return "Spajanje";
+  if (can.source === "mvp") return can.bossName ? `MVP · ${can.bossName}` : "MVP";
+  return can.bossName;
+}
+
+/** One flavor on the shelf: the can standing on a gold shelf board, with its name and rarity below. */
+function CanSlot({ slot }: { slot: ShelfSlot<EarnedCan> }) {
   const latest = slot.cans[0];
+  const from = latest && origin(latest);
 
   return (
     <li className="flex min-w-0 flex-col items-center text-center">
@@ -108,13 +148,12 @@ function CanSlot({ slot, isNext }: { slot: ShelfSlot<EarnedCan>; isNext: boolean
         {slot.flavor.name}
         {!latest && <span className="sr-only">, još nije osvojena</span>}
       </p>
-      {latest ? (
+      <p className={cn("text-xs", RARITY_TEXT[slot.flavor.rarity])}>{RARITY_LABEL[slot.flavor.rarity]}</p>
+      {latest && (
         <p className="mt-0.5 w-full px-1 text-xs text-fg-muted">
-          {latest.bossName && <span className="block truncate">{latest.bossName}</span>}
+          {from && <span className="block truncate">{from}</span>}
           <span className="tabular-nums">{formatDate(new Date(latest.earnedAt))}</span>
         </p>
-      ) : (
-        isNext && <p className="mt-0.5 text-xs text-gold-300">Sledeća</p>
       )}
     </li>
   );

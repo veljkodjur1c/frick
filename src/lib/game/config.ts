@@ -60,3 +60,12 @@ export const BOSS_ROTATION: ReadonlyArray<{ name: string; image: string | null }
   { name: "Atakhan", image: null },
 ];
 export const BOSS_ROTATION_START = "2026-10-12";
+
+/** Monster can rarities and the chance of each when a can is rolled; split evenly between the flavors of a rarity. */
+export const CAN_RARITY_CHANCE = { common: 0.5, rare: 0.35, legendary: 0.15 } as const;
+
+/** Bad-luck protection: after this many duplicates in a row the next can is a flavor the player doesn't have. */
+export const CAN_PITY_DUPLICATES = 3;
+
+/** Duplicates spent to craft one new can. */
+export const CAN_CRAFT_COST = 3;

@@ -103,8 +103,16 @@ in the same PR, put it on `/design`, and say so in the PR description.
 - Weekly awards: MVP (most points) and "Feeder of the week" (fewest points). Ties share the award; no awards when
   everyone has the same points.
 - Week end (settlement, `settleWeek()` in `src/lib/game/settlement.ts`): proofs still pending are accepted, the boss
-  result is decided, every player's LP changes, awards are given, and on a boss kill every player gets the next can
-  flavor (`nextCanFlavor()`). Each week's boss comes from `BOSS_ROTATION` in `config.ts` (`bossForWeek()`).
+  result is decided, every player's LP changes, awards are given, and on a boss kill every player gets a random can
+  (see Monster cans). Each week's boss comes from `BOSS_ROTATION` in `config.ts` (`bossForWeek()`).
+- Monster cans (`src/lib/game/cans.ts`, numbers in `config.ts`): 9 flavors in 3 rarities: common (Original, Ultra
+  White, Ultra Blue, Ultra Red) 50%, rare (Mango Loco, Ultra Violet, Pipeline Punch) 35%, legendary (Ultra Gold,
+  Khaotic) 15%, split evenly inside a rarity. On a boss kill every player gets one random can (`rollCan()`), the
+  week's MVP one more; duplicates are possible. Bad-luck protection: after 3 duplicates in a row the next can is
+  always a flavor the player doesn't have yet. Crafting: 3 duplicates (never the last can of a flavor) turn into one
+  random missing flavor, by rarity. The first player to own all 9 flavors is "Kolekcionar" (title + avatar frame,
+  kept forever); later completers get the frame. Ties on the same moment share the title.
+  Rolls happen only on the server (settlement, craft action), never in the browser.
 - No cron: `syncWeekPhase()` (`src/features/week/weekPhase.ts`) runs on every page through `WeekSync` in `AppShell`.
   It settles weeks that have ended (`finish_week()`), creates the current week if champ select never opened, activates
   it (`activate_week()`), gives it its boss and opens Sunday's champ select. Each step is idempotent.

@@ -1,11 +1,11 @@
 // Weekly settlement: what happens when a week ends. Pure functions, no DB or UI imports.
 // Rules (CLAUDE.md): proofs still pending at week end are accepted, the boss dies if the team's approved points
 // reach its HP, every player's LP changes (rank.ts), MVP has the most points and "Feeder of the week" the fewest,
-// and on a boss kill every player gets a Monster can (cans.ts).
+// and on a boss kill every player gets a random Monster can, each MVP one more (cans.ts).
 
 import { isBossDefeated } from "./boss";
+import { rollCan, type Random } from "./cans";
 import { BOSS_HP, BOSS_ROTATION, BOSS_ROTATION_START } from "./config";
-import { nextCanFlavor } from "./cans";
 import type { CompletionStatus } from "./points";
 import { applyLpChange, rankChange, weeklyLpChange, type WeeklyLp } from "./rank";
 import { weeksBetween } from "./week";
@@ -19,9 +19,12 @@ export type SettlementTask = {
 
 export type SettlementInput = {
   bossHp: number;
-  players: ReadonlyArray<{ id: string; lp: number; earnedFlavors: readonly string[] }>;
+  /** canHistory: every can the player ever got (spent ones too), flavor ids, oldest first. */
+  players: ReadonlyArray<{ id: string; lp: number; canHistory: readonly string[] }>;
   tasks: readonly SettlementTask[];
   completions: ReadonlyArray<{ taskId: string; userId: string; status: CompletionStatus }>;
+  /** Source of randomness for the can rolls; tests pass a fixed one. */
+  random?: Random;
 };
 
 export type PlayerResult = {
@@ -43,8 +46,8 @@ export type Settlement = {
   bossDefeated: boolean;
   players: PlayerResult[];
   awards: Award[];
-  /** One can per player, only when the boss died. */
-  cans: Array<{ userId: string; flavor: string }>;
+  /** Only when the boss died: one random can per player (source boss) and one more for each MVP (source mvp). */
+  cans: Array<{ userId: string; flavor: string; source: "boss" | "mvp" }>;
 };
 
 /** At week end a proof still waiting for votes counts as accepted; rejected ones stay rejected. */
@@ -71,7 +74,7 @@ export function weeklyAwards(players: ReadonlyArray<{ id: string; points: number
 }
 
 /** Everything the week's end changes, computed from the week's tasks, completions and the players. */
-export function settleWeek({ bossHp, players, tasks, completions }: SettlementInput): Settlement {
+export function settleWeek({ bossHp, players, tasks, completions, random = Math.random }: SettlementInput): Settlement {
   const taskById = new Map(tasks.map((task) => [task.id, task]));
   const approvedByPlayer = new Map<string, Set<string>>();
 
@@ -107,15 +110,21 @@ export function settleWeek({ bossHp, players, tasks, completions }: SettlementIn
     };
   });
 
-  return {
-    damage,
-    bossDefeated,
-    players: results,
-    awards: weeklyAwards(results),
-    cans: bossDefeated
-      ? players.map((player) => ({ userId: player.id, flavor: nextCanFlavor(player.earnedFlavors).id }))
-      : [],
-  };
+  const awards = weeklyAwards(results);
+  const mvps = new Set(awards.filter((award) => award.kind === "mvp").map((award) => award.userId));
+  const cans: Settlement["cans"] = [];
+  if (bossDefeated) {
+    for (const player of players) {
+      const bossCan = rollCan(player.canHistory, random).id;
+      cans.push({ userId: player.id, flavor: bossCan, source: "boss" });
+      if (mvps.has(player.id)) {
+        // Rolled after the boss can, so that can counts for bad-luck protection.
+        cans.push({ userId: player.id, flavor: rollCan([...player.canHistory, bossCan], random).id, source: "mvp" });
+      }
+    }
+  }
+
+  return { damage, bossDefeated, players: results, awards, cans };
 }
 
 /** The boss for the week starting `startsOn`: BOSS_ROTATION in order from BOSS_ROTATION_START, repeating. */
