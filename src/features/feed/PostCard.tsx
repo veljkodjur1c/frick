@@ -41,7 +41,8 @@ export function PostCard({ author, createdAt, imageUrl, imageAlt, caption, badge
             {formatTimeAgo(new Date(createdAt))}
           </time>
         </div>
-        {badge && <div className="shrink-0">{badge}</div>}
+        {/* Top-aligned so status badges sit on the name's line; a stamp is as tall as the header anyway. */}
+        {badge && <div className="shrink-0 self-start">{badge}</div>}
       </header>
 
       {imageUrl ? (
