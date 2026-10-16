@@ -1,5 +1,7 @@
 "use server";
 
+import { after } from "next/server";
+import { notifyNewComment } from "@/features/notifications/push";
 import { getCurrentUser } from "@/lib/supabase/auth";
 import { createClient } from "@/lib/supabase/server";
 import { commentBodyError, type CommentData } from "./comments";
@@ -79,6 +81,8 @@ export async function addComment(
     return { ok: false, error: "Komentar nije poslat. Pokušaj ponovo." };
   }
 
+  // After the response, so the player doesn't wait for the push services.
+  after(() => notifyNewComment(user.id, postId, trimmed));
   return { ok: true, comment: toComment(data, user.id) };
 }
 

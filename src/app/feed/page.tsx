@@ -3,12 +3,14 @@ import { PageHeader } from "@/components/ui";
 import { FeedActionWheel } from "@/features/feed/FeedActionWheel";
 import { FeedList, FeedListSkeleton } from "@/features/feed/FeedList";
 import { countVoteQueue } from "@/features/feed/queries";
+import { PushOptInCard } from "@/features/notifications/PushOptInCard";
 import { requireUser } from "@/lib/supabase/auth";
 
 export default function FeedPage() {
   return (
     <>
       <PageHeader title="Feed" />
+      <PushOptInCard className="mb-4" />
       <Suspense fallback={<FeedListSkeleton />}>
         <FeedList />
       </Suspense>
