@@ -22,7 +22,8 @@ UI language: Serbian (Latin script). Code, comments, commit messages, branch nam
   (`auth`: login/sign-up form + actions, `profile`: profile form, avatar upload, `feed`: posts, proofs and announcer events in one list,
   `tasks`: weekly task list, ticking `check` tasks, `champ-select`: proposals and votes,
   `week`: `syncWeekPhase()` moves the weeks along: settlement, activation, boss, champ select,
-  `titles`: category icons/badges, reading the current title holders, the profile's title banners)
+  `titles`: category icons/badges, reading the current title holders, the profile's title banners,
+  `notifications`: web push, the "Uključi obaveštenja" card on the feed and `notifyNewPost/Proof/Comment()`)
 - `src/lib/supabase/`     Supabase helpers: `client.ts` (browser), `server.ts` (server), `auth.ts` (current user),
   `proxy.ts` (session refresh), `admin.ts` (service role, server only)
 - `src/lib/cn.ts`, `src/lib/format.ts`  small helpers (class joining, Serbian number format)
@@ -152,7 +153,17 @@ in the same PR, put it on `/design`, and say so in the PR description.
 - Normal reads/writes use `createClient()` (server or browser) and go through RLS.
 - `createAdminClient()` (`@/lib/supabase/admin`) uses the service role key and bypasses RLS. Only for server code
   (Server Actions, Route Handlers, cron, and `syncWeekPhase()` during a page render) that writes system tables
-  (`weeks`, `bosses`, `tasks`, `awards`, `cans`), after checking the user. Never import it from a Client Component.
+  (`weeks`, `bosses`, `tasks`, `awards`, `cans`), after checking the user, and for sending push notifications
+  (other players' `push_subscriptions`). Never import it from a Client Component.
+
+## Push notifications
+- Web push to the installed app (iPhone: only from the home screen app, iOS 16.4+). A player turns them on with the
+  card at the top of the feed; each phone is a row in `push_subscriptions` (saved through `save_push_subscription()`).
+- Sent after a new post and a new proof (to everyone except the author) and a comment (to the post's author), from
+  the Server Action inside `after()`, so nobody waits for it. Texts in `src/features/notifications/messages.ts`.
+  `public/sw.js` shows them; a tap opens `/feed`.
+- Keys: `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` (`.env.example`), one pair everywhere.
+  Without them nothing is sent and the card stays hidden.
 
 ## Storage
 - `avatars`: public bucket, `profiles.avatar_url` is a plain public URL.

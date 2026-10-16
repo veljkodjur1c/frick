@@ -2,6 +2,8 @@
 
 import type { PostgrestError } from "@supabase/supabase-js";
 import { refresh } from "next/cache";
+import { after } from "next/server";
+import { notifyNewPost } from "@/features/notifications/push";
 import { getCurrentUser } from "@/lib/supabase/auth";
 import { createClient } from "@/lib/supabase/server";
 import { CAPTION_MAX_LENGTH } from "./constants";
@@ -30,17 +32,19 @@ export async function createPost({ imagePath, caption }: CreatePostInput): Promi
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.from("posts").insert({
-    user_id: user.id,
-    image_path: imagePath,
-    caption: trimmed || null,
-  });
+  const { data: post, error } = await supabase
+    .from("posts")
+    .insert({ user_id: user.id, image_path: imagePath, caption: trimmed || null })
+    .select("id")
+    .single<{ id: string }>();
 
   if (error) {
     console.error("createPost failed", error);
     return "Objava nije sačuvana. Pokušaj ponovo.";
   }
 
+  // After the response, so the player doesn't wait for the push services.
+  after(() => notifyNewPost(user.id, post.id, trimmed || null));
   refresh();
   return null;
 }

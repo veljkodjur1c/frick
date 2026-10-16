@@ -2,6 +2,8 @@
 
 import type { PostgrestError } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
+import { notifyNewProof } from "@/features/notifications/push";
 import type { ActionResult } from "@/features/tasks/actions";
 import type { TaskScope, TaskType, WeekStatus } from "@/features/tasks/queries";
 import type { CompletionStatus } from "@/lib/game/points";
@@ -16,6 +18,7 @@ const GENERIC_ERROR = "Dokaz nije sačuvan. Pokušaj ponovo.";
 const VOTE_ERROR = "Glas nije sačuvan. Pokušaj ponovo.";
 
 type TaskProofRow = {
+  title: string;
   type: TaskType;
   scope: TaskScope;
   assignee_id: string | null;
@@ -41,7 +44,7 @@ export async function submitProof(taskId: string, imagePath: string): Promise<Ac
   // RLS enforces most of this too; checking first gives a clear message instead of a policy error.
   const { data: task, error: taskError } = await supabase
     .from("tasks")
-    .select("type, scope, assignee_id, week:weeks(status)")
+    .select("title, type, scope, assignee_id, week:weeks(status)")
     .eq("id", taskId)
     .maybeSingle<TaskProofRow>();
   if (taskError || !task || (task.scope === "solo" && task.assignee_id !== user.id)) {
@@ -78,7 +81,11 @@ export async function submitProof(taskId: string, imagePath: string): Promise<Ac
   }
 
   // user_id defaults to auth.uid(); the trigger sets status to pending for proof tasks.
-  const { error } = await supabase.from("completions").insert({ task_id: taskId, proof_path: imagePath });
+  const { data: completion, error } = await supabase
+    .from("completions")
+    .insert({ task_id: taskId, proof_path: imagePath })
+    .select("id")
+    .single<{ id: string }>();
   if (error) {
     // 23505 = unique violation: a proof for this task was saved a moment ago (double tap).
     if (error.code === "23505") return { ok: false, error: "Dokaz je već poslat i čeka glasove." };
@@ -86,6 +93,8 @@ export async function submitProof(taskId: string, imagePath: string): Promise<Ac
     return { ok: false, error: GENERIC_ERROR };
   }
 
+  // After the response, so the player doesn't wait for the push services.
+  after(() => notifyNewProof(user.id, completion.id, task.title));
   revalidatePath("/tasks");
   return { ok: true };
 }
