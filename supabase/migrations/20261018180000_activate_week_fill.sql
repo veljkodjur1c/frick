@@ -4,11 +4,11 @@
 -- {title, type, points, category}. They are added in the same transaction as the approved proposals, so a week is
 -- activated with its fill-up or not at all. Filled-in tasks are team tasks without a proposal.
 --
--- p_fill_tasks defaults to an empty array, so a call with only the first two arguments still works.
+-- Added next to the two-argument version (20261013200000_task_categories.sql) instead of replacing it, so nothing is
+-- dropped and code still calling the old one keeps working. syncWeekPhase() always calls this one; the old one can go
+-- in a later cleanup migration.
 
-drop function public.activate_week(uuid, integer);
-
-create function public.activate_week(p_week_id uuid, p_approvals_needed integer, p_fill_tasks jsonb default '[]'::jsonb)
+create function public.activate_week(p_week_id uuid, p_approvals_needed integer, p_fill_tasks jsonb)
 returns integer
 language plpgsql
 set search_path = ''
