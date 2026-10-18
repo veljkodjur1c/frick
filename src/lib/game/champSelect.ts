@@ -7,6 +7,7 @@ import {
   PROPOSAL_APPROVALS_NEEDED,
   PROPOSAL_MAX_POINTS,
   PROPOSAL_MIN_POINTS,
+  PROPOSAL_POINTS_STEP,
 } from "./config";
 import { currentWeekStart, dayOfWeek, hourOf, nextWeekStart } from "./week";
 
@@ -25,7 +26,18 @@ export function isProposalApproved(approveVotes: number): boolean {
   return approveVotes >= PROPOSAL_APPROVALS_NEEDED;
 }
 
-/** Whole points within PROPOSAL_MIN_POINTS..PROPOSAL_MAX_POINTS. */
+/** Points within PROPOSAL_MIN_POINTS..PROPOSAL_MAX_POINTS, in steps of PROPOSAL_POINTS_STEP. */
 export function isValidProposalPoints(points: number): boolean {
-  return Number.isInteger(points) && points >= PROPOSAL_MIN_POINTS && points <= PROPOSAL_MAX_POINTS;
+  return (
+    Number.isInteger(points) &&
+    points >= PROPOSAL_MIN_POINTS &&
+    points <= PROPOSAL_MAX_POINTS &&
+    points % PROPOSAL_POINTS_STEP === 0
+  );
+}
+
+/** `points` moved one step up (+1) or down (-1), kept within PROPOSAL_MIN_POINTS..PROPOSAL_MAX_POINTS. */
+export function stepProposalPoints(points: number, direction: 1 | -1): number {
+  const next = points + direction * PROPOSAL_POINTS_STEP;
+  return Math.min(PROPOSAL_MAX_POINTS, Math.max(PROPOSAL_MIN_POINTS, next));
 }

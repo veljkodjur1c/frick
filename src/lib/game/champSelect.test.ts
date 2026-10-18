@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { champSelectWeekStart, isChampSelectOpen, isProposalApproved, isValidProposalPoints } from "./champSelect";
+import {
+  champSelectWeekStart,
+  isChampSelectOpen,
+  isProposalApproved,
+  isValidProposalPoints,
+  stepProposalPoints,
+} from "./champSelect";
 
 // Inputs are UTC instants. Belgrade is UTC+2 until 2026-10-25, UTC+1 after.
 const at = (iso: string) => new Date(iso);
@@ -44,12 +50,26 @@ describe("isProposalApproved", () => {
 });
 
 describe("isValidProposalPoints", () => {
-  it("accepts whole points from 5 to 100", () => {
+  it("accepts points from 5 to 50 in steps of 5", () => {
     expect(isValidProposalPoints(5)).toBe(true);
-    expect(isValidProposalPoints(100)).toBe(true);
-    expect(isValidProposalPoints(4)).toBe(false);
-    expect(isValidProposalPoints(101)).toBe(false);
+    expect(isValidProposalPoints(25)).toBe(true);
+    expect(isValidProposalPoints(50)).toBe(true);
+    expect(isValidProposalPoints(0)).toBe(false);
+    expect(isValidProposalPoints(55)).toBe(false);
+    expect(isValidProposalPoints(12)).toBe(false);
     expect(isValidProposalPoints(12.5)).toBe(false);
     expect(isValidProposalPoints(Number.NaN)).toBe(false);
+  });
+});
+
+describe("stepProposalPoints", () => {
+  it("moves by 5", () => {
+    expect(stepProposalPoints(10, 1)).toBe(15);
+    expect(stepProposalPoints(10, -1)).toBe(5);
+  });
+
+  it("stays within 5 and 50", () => {
+    expect(stepProposalPoints(5, -1)).toBe(5);
+    expect(stepProposalPoints(50, 1)).toBe(50);
   });
 });

@@ -67,7 +67,9 @@ export function ProposalCard({ proposal }: { proposal: ProposalData }) {
         )}
         <div className="mt-1.5 flex flex-wrap gap-1.5">
           <Badge tone={proposal.scope === "team" ? "hextech" : "neutral"}>
-            {proposal.scope === "team" ? "Tim" : "Solo"}
+            {proposal.assignee
+              ? `Solo · ${proposal.assignee.isViewer ? "ti" : proposal.assignee.displayName}`
+              : "Tim"}
           </Badge>
           <Badge>{proposal.type === "proof" ? "Sa slikom" : "Štikliranje"}</Badge>
           {proposal.category && <CategoryBadge category={proposal.category} />}

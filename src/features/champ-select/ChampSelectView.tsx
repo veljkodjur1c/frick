@@ -41,7 +41,7 @@ export async function ChampSelectView() {
             Predlog sa bar {formatNumber(PROPOSAL_APPROVALS_NEEDED)} Za glasa postaje task. Glasanje traje do ponoći.
           </span>
         </p>
-        <NewProposalSheet />
+        <NewProposalSheet players={data.players} />
       </Card>
 
       <section className="flex flex-col gap-3">
