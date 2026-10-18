@@ -299,6 +299,7 @@ export default function DesignPage() {
         <ProgressBar label="Taskovi ove nedelje" value={7} max={12} showValue />
         <ProgressBar label="Do Gold I" value={64} max={100} tone="gold" showValue />
         <ProgressBar label="Legit glasovi" value={2} max={2} tone="success" size="sm" />
+        <ProgressBar label="Moguća šteta (previše)" value={900} max={850} tone="danger" showValue />
       </Section>
 
       <Section title="Forme">

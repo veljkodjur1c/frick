@@ -52,6 +52,17 @@ export const PROPOSAL_POINTS_STEP = 5;
 /** Where the points stepper in the proposal form starts. */
 export const PROPOSAL_DEFAULT_POINTS = 10;
 
+/**
+ * PLACEHOLDER: the "max damage" of next week's approved tasks (team task = points x PLAYERS, solo = points) should
+ * land between these multiples of the boss HP. 1.4-1.7 x 500 HP = 700-850: the boss dies once the team does about
+ * 60-70% of everything. Below the range, the week is filled up from FILL_TASK_POOL; above it there is only a warning.
+ */
+export const CHAMP_SELECT_DAMAGE_MIN_FACTOR = 1.4;
+export const CHAMP_SELECT_DAMAGE_MAX_FACTOR = 1.7;
+
+/** Each week the fill-up starts this many tasks further into FILL_TASK_POOL, so weeks don't get the same ones. */
+export const FILL_POOL_WEEKLY_SHIFT = 5;
+
 /** PLACEHOLDER: HP of every weekly boss. Issue #17 ("later") makes it grow week by week. */
 export const BOSS_HP = 500;
 

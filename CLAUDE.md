@@ -137,6 +137,11 @@ in the same PR, put it on `/design`, and say so in the PR description.
   player the proposer picks, themselves included) and
   votes Za/Protiv on any proposal, their own too. A proposal with at least 3 Za votes becomes a task next week; the rest
   are rejected. Logic in `src/lib/game/champSelect.ts`.
+- Damage range (PLACEHOLDER): a task's max damage is points x 5 for a team task and points for a solo task. The
+  approved tasks of a week should add up to 1.4-1.7 x boss HP (700-850 for 500 HP). Champ select shows a meter
+  ("Moguća šteta") with the proposals that pass right now and warns above the range. Below it, `activate_week()` fills
+  the week up at midnight with team tasks from `FILL_TASK_POOL` (`src/lib/game/taskPool.ts`) until it is in the range,
+  without a vote (`fillTasks()`); a week whose champ select never opened gets only pool tasks.
 - In code: every number lives in `src/lib/game/config.ts` (undecided ones are marked PLACEHOLDER). Week math
   (`weekStartOf`, `weekEndOf`, `nextWeekStart`, `currentWeekStart`, `dayOfWeek`, all Europe/Belgrade) is in
   `src/lib/game/week.ts`. Never compute week boundaries with `getDay()` or UTC dates yourself.

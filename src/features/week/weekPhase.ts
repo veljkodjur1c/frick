@@ -1,12 +1,21 @@
 import "server-only";
 import { cache } from "react";
 import { PROPOSAL_APPROVALS_NEEDED } from "@/lib/game/config";
-import { champSelectWeekStart, isChampSelectOpen } from "@/lib/game/champSelect";
+import {
+  champSelectWeekStart,
+  damageRange,
+  fillTasks,
+  isChampSelectOpen,
+  isProposalApproved,
+} from "@/lib/game/champSelect";
+import type { PoolTask } from "@/lib/game/taskPool";
 import { bossForWeek } from "@/lib/game/settlement";
 import { currentWeekStart } from "@/lib/game/week";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getCurrentUser } from "@/lib/supabase/auth";
 import { finishWeek } from "./finishWeek";
+
+type AdminClient = ReturnType<typeof createAdminClient>;
 
 type WeekRow = {
   id: string;
@@ -18,8 +27,9 @@ type WeekRow = {
 /**
  * Moves the weeks along with the clock, so nothing depends on a cron job firing on time. In order:
  *   1. Settles every active week that has ended (finishWeek(): pending proofs, boss, LP, awards, cans).
- *   2. Makes sure the current week exists; without a champ select it starts with no tasks.
- *   3. Activates any champ select week that has started (approved proposals -> tasks).
+ *   2. Makes sure the current week exists; without a champ select it starts with only pool tasks (step 3).
+ *   3. Activates any champ select week that has started (approved proposals -> tasks), filled up from the task
+ *      pool when the approved tasks' max damage is below the range for its boss (fillTasks()).
  *   4. Gives the current week its boss (bossForWeek()).
  *   5. Sunday from CHAMP_SELECT_OPENS_HOUR: creates next week's row in champ select (proposals open).
  * WeekSync in the app frame runs it on every page; pages that read week data await it first.
@@ -64,6 +74,7 @@ export const syncWeekPhase = cache(async (): Promise<void> => {
     const { error: activateError } = await admin.rpc("activate_week", {
       p_week_id: week.id,
       p_approvals_needed: PROPOSAL_APPROVALS_NEEDED,
+      p_fill_tasks: await fillTasksFor(admin, week),
     });
     if (activateError) throw activateError;
   }
@@ -92,3 +103,22 @@ export const syncWeekPhase = cache(async (): Promise<void> => {
     if (openError) throw openError;
   }
 });
+
+/**
+ * The pool tasks a champ select week gets on activation (fillTasks()), from the proposals that pass right now.
+ * activate_week() decides the proposals again under its lock; a vote landing in between only shifts the fill-up a bit.
+ */
+async function fillTasksFor(admin: AdminClient, week: WeekRow): Promise<PoolTask[]> {
+  const { data, error } = await admin
+    .from("task_proposals")
+    .select("title, scope, points, votes:task_votes(approve)")
+    .eq("week_id", week.id)
+    .eq("status", "open")
+    .overrideTypes<
+      Array<{ title: string; scope: "team" | "solo"; points: number; votes: Array<{ approve: boolean }> }>,
+      { merge: false }
+    >();
+  if (error) throw error;
+  const approved = data.filter((p) => isProposalApproved(p.votes.filter((v) => v.approve).length));
+  return fillTasks(week.starts_on, approved, damageRange(bossForWeek(week.starts_on).hp));
+}
