@@ -1,12 +1,14 @@
 import { cn } from "@/lib/cn";
 import { formatNumber } from "@/lib/format";
 
-export type ProgressTone = "hextech" | "gold" | "success";
+export type ProgressTone = "hextech" | "gold" | "success" | "danger";
 
 const TONES: Record<ProgressTone, string> = {
   hextech: "bg-hextech-300",
   gold: "bg-linear-to-r from-gold-500 to-gold-300",
   success: "bg-success",
+  // Over a limit (e.g. too many tasks in champ select).
+  danger: "bg-danger",
 };
 
 type ProgressBarProps = {
