@@ -38,7 +38,6 @@ export const FILL_TASK_POOL: readonly PoolTask[] = [
     points: 25,
     category: "random",
   },
-  // New, not reviewed yet.
   { title: "Odradi trening u 7h ujutru ili ranije", type: "proof", points: 35, category: "gym" },
   { title: "Probaj energetsko piće koje nije Monster i oceni ga", type: "proof", points: 10, category: "caffeine" },
   { title: "Odradi 45 minuta kardija u komadu", type: "proof", points: 30, category: "gym" },
