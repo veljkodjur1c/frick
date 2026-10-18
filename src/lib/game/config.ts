@@ -42,9 +42,15 @@ export const CHAMP_SELECT_OPENS_HOUR = 18;
 /** PLACEHOLDER: "Za" votes a proposed task needs to become a task next week (a majority of the 5 players). */
 export const PROPOSAL_APPROVALS_NEEDED = 3;
 
-/** PLACEHOLDER: points a proposed task may have. */
+/**
+ * PLACEHOLDER: points a proposed task may have, in steps of PROPOSAL_POINTS_STEP (5, 10, ... 50).
+ * Capped at 50 so one team task done by all 5 players (250 damage) can't take more than half of a BOSS_HP boss.
+ */
 export const PROPOSAL_MIN_POINTS = 5;
-export const PROPOSAL_MAX_POINTS = 100;
+export const PROPOSAL_MAX_POINTS = 50;
+export const PROPOSAL_POINTS_STEP = 5;
+/** Where the points stepper in the proposal form starts. */
+export const PROPOSAL_DEFAULT_POINTS = 10;
 
 /** PLACEHOLDER: HP of every weekly boss. Issue #17 ("later") makes it grow week by week. */
 export const BOSS_HP = 500;

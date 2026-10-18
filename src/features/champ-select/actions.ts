@@ -3,7 +3,7 @@
 import type { PostgrestError } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
 import type { TaskScope, TaskType } from "@/features/tasks/queries";
-import { PROPOSAL_MAX_POINTS, PROPOSAL_MIN_POINTS } from "@/lib/game/config";
+import { PROPOSAL_MAX_POINTS, PROPOSAL_MIN_POINTS, PROPOSAL_POINTS_STEP } from "@/lib/game/config";
 import { champSelectWeekStart, isValidProposalPoints } from "@/lib/game/champSelect";
 import { isTaskCategory, type TaskCategory } from "@/lib/game/titles";
 import { getCurrentUser } from "@/lib/supabase/auth";
@@ -24,10 +24,12 @@ export type NewProposal = {
   scope: TaskScope;
   points: number;
   category: TaskCategory;
+  /** The player who gets a solo task (any registered player, the proposer too); ignored for team tasks. */
+  assigneeId: string | null;
 };
 
 /**
- * Proposes a task for next week. A solo task is for the player who proposes it.
+ * Proposes a task for next week. A solo task goes to the player picked in `assigneeId`.
  * The proposer's Za vote is added right away; they can take it back like any vote.
  */
 export async function createProposal(input: NewProposal): Promise<ActionResult> {
@@ -48,7 +50,14 @@ export async function createProposal(input: NewProposal): Promise<ActionResult> 
   }
   if (!isTaskCategory(input.category)) return { ok: false, error: "Izaberi kategoriju." };
   if (!isValidProposalPoints(input.points)) {
-    return { ok: false, error: `Poeni moraju biti ceo broj od ${PROPOSAL_MIN_POINTS} do ${PROPOSAL_MAX_POINTS}.` };
+    return {
+      ok: false,
+      error: `Poeni idu od ${PROPOSAL_MIN_POINTS} do ${PROPOSAL_MAX_POINTS}, u koracima od ${PROPOSAL_POINTS_STEP}.`,
+    };
+  }
+  const assigneeId = input.scope === "solo" ? input.assigneeId : null;
+  if (input.scope === "solo" && (typeof assigneeId !== "string" || !UUID.test(assigneeId))) {
+    return { ok: false, error: "Izaberi za koga je task." };
   }
 
   // Champ select is open while next week's row is in champ_select; syncWeekPhase() opens and closes it.
@@ -62,6 +71,16 @@ export async function createProposal(input: NewProposal): Promise<ActionResult> 
   if (weekError) console.error("createProposal: read week failed", weekError);
   if (!week) return { ok: false, error: CLOSED };
 
+  if (assigneeId) {
+    const { data: assignee, error: assigneeError } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("id", assigneeId)
+      .maybeSingle<{ id: string }>();
+    if (assigneeError) console.error("createProposal: read assignee failed", assigneeError);
+    if (!assignee) return { ok: false, error: "Taj igrač ne postoji. Osveži stranicu i izaberi ponovo." };
+  }
+
   const { data: proposal, error } = await supabase
     .from("task_proposals")
     .insert({
@@ -71,7 +90,7 @@ export async function createProposal(input: NewProposal): Promise<ActionResult> 
       description: description || null,
       type: input.type,
       scope: input.scope,
-      assignee_id: input.scope === "solo" ? user.id : null,
+      assignee_id: assigneeId,
       points: input.points,
       category: input.category,
     })

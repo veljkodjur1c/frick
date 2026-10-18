@@ -133,7 +133,8 @@ in the same PR, put it on `/design`, and say so in the PR description.
   It settles weeks that have ended (`finish_week()`), creates the current week if champ select never opened, activates
   it (`activate_week()`), gives it its boss and opens Sunday's champ select. Each step is idempotent.
 - Champ select details (PLACEHOLDER numbers): opens Sunday 18:00 and closes at Monday 00:00. Each player proposes
-  tasks (title, category, `check`/`proof`, `team`/`solo`, 5-100 points; a solo task is for the player who proposes it) and
+  tasks (title, category, `check`/`proof`, `team`/`solo`, 5-50 points in steps of 5; a solo task goes to any registered
+  player the proposer picks, themselves included) and
   votes Za/Protiv on any proposal, their own too. A proposal with at least 3 Za votes becomes a task next week; the rest
   are rejected. Logic in `src/lib/game/champSelect.ts`.
 - In code: every number lives in `src/lib/game/config.ts` (undecided ones are marked PLACEHOLDER). Week math
